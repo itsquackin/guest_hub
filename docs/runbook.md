@@ -47,6 +47,7 @@ Multiple files per directory are supported and processed in sorted order.
 | bridge_guest_activity    | `data/processed/hub/bridge_guest_activity.csv`|
 | QA name issues           | `data/processed/qa/qa_name_issues.csv`        |
 | QA phone issues          | `data/processed/qa/qa_phone_issues.csv`       |
+| QA duplicate room rows   | `data/processed/qa/qa_duplicate_issues.csv`   |
 | QA possible matches      | `data/processed/qa/qa_possible_matches.csv`   |
 | Run manifest             | `data/processed/qa/<run_id>_manifest.json`    |
 

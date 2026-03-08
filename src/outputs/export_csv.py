@@ -65,6 +65,7 @@ def export_all_csv(ctx: RunContext) -> None:
     write_csv(ctx.qa_name_issues,      qa_dir / "qa_name_issues.csv")
     write_csv(ctx.qa_phone_issues,     qa_dir / "qa_phone_issues.csv")
     write_csv(ctx.qa_lookup_issues,    qa_dir / "qa_lookup_issues.csv")
+    write_csv(ctx.qa_duplicate_issues, qa_dir / "qa_duplicate_issues.csv")
     write_csv(ctx.qa_possible_matches, qa_dir / "qa_possible_matches.csv")
     write_csv(ctx.qa_unmatched_spa,    qa_dir / "qa_unmatched_spa.csv")
     write_csv(ctx.qa_unmatched_dining, qa_dir / "qa_unmatched_dining.csv")

@@ -13,16 +13,23 @@ from src.loaders.room_loader import load_room_files
 from src.loaders.spa_loader import load_spa_files
 from src.loaders.dining_loader import load_dining_files
 from src.matching.exact_match import ExactMatchCandidate, RoomStayContext, match_exact_name_date
-from src.matching.fuzzy_match import are_fuzzy_scores_ambiguous, match_fuzzy_name_date
+from src.matching.fuzzy_match import are_fuzzy_scores_ambiguous
 from src.matching.guest_resolver import resolve_room_guests, update_guest_activity_counts
 from src.matching.keys import make_activity_source_key
-from src.matching.scorer import make_exact_result, make_fuzzy_result
+from src.matching.phone_support import GuestPhoneContext, PhoneMatchCandidate, find_phone_support_candidates
+from src.matching.repeated_pattern import ActivityRecord, find_repeated_patterns
+from src.matching.scorer import add_phone_support, make_exact_result, make_fuzzy_result
 from src.models.hub_schema import BridgeGuestActivity, BridgeGuestRoomStay, DimPhone, FactRoomStay
 from src.parsers.dining_parser import parse_dining_csv_file
 from src.parsers.room_parser import parse_room_xml_file
 from src.parsers.spa_parser import parse_spa_pdf_file
 from src.pipeline.run_context import RunContext
-from src.qa.possible_matches import collect_ambiguous_fuzzy
+from src.qa.possible_matches import (
+    build_possible_match_issue,
+    collect_ambiguous_fuzzy,
+    collect_outside_stay_window,
+    collect_shared_phone_different_name,
+)
 from src.qa.unmatched import collect_unmatched_dining, collect_unmatched_spa
 from src.qa.validation import validate_canonical_outputs
 from src.transforms.rooms_enrich import RoomLookupBundle, enrich_room_lookups
@@ -121,79 +128,97 @@ def stage_parse_dining_csv(ctx: RunContext) -> None:
         logger.info("Parsed %d raw dining records", len(raw_records))
 
 
-# ── Stage 6+7+8: standardize, expand, enrich ─────────────────────────────────
+# ── Stages 6-8: standardize shared fields, expand rooms, enrich lookups ──────
 
-def stage_standardize_and_expand_rooms(ctx: RunContext) -> None:
-    """Stages 6, 7, 8 combined: standardize → expand guests → enrich lookups."""
-    with _timed(ctx, "standardize_expand_enrich_rooms"):
+def stage_standardize_shared_fields(ctx: RunContext) -> None:
+    """Stage 6: standardize source rows into canonical-ready records.
+
+    - rooms are standardized to reservation-level rows (guest expansion deferred)
+    - spa and dining are standardized directly to canonical rows
+    """
+    with _timed(ctx, "standardize_shared_fields"):
         ts = make_load_timestamp()
+        standardized_rooms: list = []
+        for raw in getattr(ctx, "_rooms_raw", []):
+            try:
+                standardized_rooms.append(
+                    standardize_room_record(
+                        raw,
+                        load_timestamp=ts,
+                        date_tolerance_days=ctx.date_tolerance_days,
+                    )
+                )
+            except Exception as exc:
+                msg = f"rooms_standardize_error:{raw.source_row_id}:{exc}"
+                logger.error(msg)
+                ctx.errors.append(msg)
+
+        ctx._rooms_standardized = standardized_rooms
+        ctx.spa_canonical = standardize_spa_file(getattr(ctx, "_spa_raw", []), load_timestamp=ts)
+        ctx.dining_canonical = standardize_dining_file(getattr(ctx, "_dining_raw", []), load_timestamp=ts)
+        logger.info(
+            "Standardized rows — rooms:%d spa:%d dining:%d",
+            len(standardized_rooms), len(ctx.spa_canonical), len(ctx.dining_canonical),
+        )
+
+
+def stage_expand_room_guests(ctx: RunContext) -> None:
+    """Stage 7: expand standardized room reservations to guest-grain rows."""
+    with _timed(ctx, "expand_room_guests"):
+        expanded: list = []
+        for row in getattr(ctx, "_rooms_standardized", []):
+            try:
+                expanded.extend(expand_rooms_canonical_row(row))
+            except Exception as exc:
+                msg = f"rooms_expand_error:{row.source_row_id}:{exc}"
+                logger.error(msg)
+                ctx.errors.append(msg)
+        ctx.rooms_canonical = expanded
+        logger.info(
+            "Expanded room guests: %d guest rows from %d reservation rows",
+            len(expanded), len(getattr(ctx, "_rooms_standardized", [])),
+        )
+
+
+def stage_enrich_room_lookups(ctx: RunContext) -> None:
+    """Stage 8: enrich room type/special-request lookups and emit lookup QA."""
+    with _timed(ctx, "enrich_room_lookups"):
+        from src.models.qa_schema import QaLookupIssue
+
         lookups = RoomLookupBundle(
             room_type_map=ctx.room_type_map,
             special_request_map=ctx.special_request_map,
         )
-        expanded: list = []
-        for raw in getattr(ctx, "_rooms_raw", []):
-            try:
-                # Standardize (reservation-level)
-                std_row = standardize_room_record(
-                    raw,
-                    load_timestamp=ts,
-                    date_tolerance_days=ctx.date_tolerance_days,
-                )
-                # Enrich room type / specials lookups
-                enrich_result = enrich_room_lookups(
-                    std_row.room_type_code,
-                    std_row.assigned_room_type_code,
-                    std_row.specials_list,
-                    lookups,
-                )
-                std_row.room_type_description = enrich_result.room_type_description
-                std_row.assigned_room_type_description = enrich_result.assigned_room_type_description
-                std_row.specials_descriptions = enrich_result.specials_descriptions
-                # Collect lookup QA issues
-                for issue_str in enrich_result.qa_lookup_issues:
-                    from src.models.qa_schema import QaLookupIssue
-                    ctx.qa_lookup_issues.append(
-                        QaLookupIssue(
-                            source_system=std_row.source_system,
-                            source_row_id=std_row.source_row_id,
-                            confirmation_number=std_row.confirmation_number,
-                            lookup_type=issue_str.split(":")[0],
-                            lookup_code=issue_str.split(":")[-1],
-                            issue_code=issue_str.split(":")[0],
-                        )
+        for row in ctx.rooms_canonical:
+            enrich_result = enrich_room_lookups(
+                row.room_type_code,
+                row.assigned_room_type_code,
+                row.specials_list,
+                lookups,
+            )
+            row.room_type_description = enrich_result.room_type_description
+            row.assigned_room_type_description = enrich_result.assigned_room_type_description
+            row.specials_descriptions = enrich_result.specials_descriptions
+
+            for issue_str in enrich_result.qa_lookup_issues:
+                issue_parts = issue_str.split(":")
+                lookup_code = issue_parts[-1] if issue_parts else ""
+                issue_code = issue_parts[0] if issue_parts else "lookup_issue"
+                ctx.qa_lookup_issues.append(
+                    QaLookupIssue(
+                        source_system=row.source_system,
+                        source_row_id=row.source_row_id,
+                        confirmation_number=row.confirmation_number,
+                        lookup_type=issue_code,
+                        lookup_code=lookup_code,
+                        issue_code=issue_code,
                     )
-                # Expand guests (reservation → guest-grain)
-                guest_rows = expand_rooms_canonical_row(std_row)
-                expanded.extend(guest_rows)
-            except Exception as exc:
-                msg = f"rooms_expand_error:{raw.source_row_id}:{exc}"
-                logger.error(msg)
-                ctx.errors.append(msg)
+                )
 
-        ctx.rooms_canonical = expanded
         logger.info(
-            "Rooms canonical: %d guest rows from %d raw records",
-            len(expanded), len(getattr(ctx, "_rooms_raw", [])),
+            "Room lookup enrichment complete: rows:%d lookup_issues:%d",
+            len(ctx.rooms_canonical), len(ctx.qa_lookup_issues),
         )
-
-
-def stage_standardize_spa(ctx: RunContext) -> None:
-    with _timed(ctx, "standardize_spa"):
-        ts = make_load_timestamp()
-        ctx.spa_canonical = standardize_spa_file(
-            getattr(ctx, "_spa_raw", []), load_timestamp=ts
-        )
-        logger.info("Spa canonical: %d rows", len(ctx.spa_canonical))
-
-
-def stage_standardize_dining(ctx: RunContext) -> None:
-    with _timed(ctx, "standardize_dining"):
-        ts = make_load_timestamp()
-        ctx.dining_canonical = standardize_dining_file(
-            getattr(ctx, "_dining_raw", []), load_timestamp=ts
-        )
-        logger.info("Dining canonical: %d rows", len(ctx.dining_canonical))
 
 
 # ── Stage 10: QA validation ───────────────────────────────────────────────────
@@ -205,9 +230,11 @@ def stage_run_qa_validations(ctx: RunContext) -> None:
             ctx.spa_canonical,
             ctx.dining_canonical,
             lookup_issues=ctx.qa_lookup_issues,
+            shared_phone_threshold=ctx.shared_phone_threshold,
         )
         ctx.qa_name_issues.extend(report.name_issues)
         ctx.qa_phone_issues.extend(report.phone_issues)
+        ctx.qa_duplicate_issues.extend(report.duplicate_issues)
         logger.info("QA validation complete: %d total issues", report.total_issues)
 
 
@@ -250,117 +277,230 @@ def stage_build_guest_phone_dimensions(ctx: RunContext) -> None:
         )
 
 
-# ── Stages 12–15: matching and hub tables ─────────────────────────────────────
+def _build_stays(ctx: RunContext) -> list[RoomStayContext]:
+    """Build stay contexts at room-row grain for robust exact/fuzzy matching."""
+    name_to_guest_id = {
+        name_key: guest.guest_id
+        for name_key, guest in ctx.dim_guests.items()
+    }
+    stays: list[RoomStayContext] = []
+    for row in ctx.rooms_canonical:
+        if not row.match_name_key or not row.arrival_date or not row.departure_date:
+            continue
+        guest_id = name_to_guest_id.get(row.match_name_key)
+        if not guest_id:
+            continue
+        stays.append(
+            RoomStayContext(
+                guest_id=guest_id,
+                match_name_key=row.match_name_key,
+                arrival_date=row.arrival_date,
+                departure_date=row.departure_date,
+            )
+        )
+    return stays
 
-def stage_run_matching(ctx: RunContext) -> None:
-    """Run exact + fuzzy matching for spa and dining against room guests."""
-    with _timed(ctx, "run_matching"):
-        # Build room stay contexts from canonical
-        stays: list[RoomStayContext] = []
-        guest_by_key: dict[str, str] = {}  # match_name_key -> guest_id
-        for name_key, guest in ctx.dim_guests.items():
-            # Find a row for this guest to get arrival/departure
-            for row in ctx.rooms_canonical:
-                if row.match_name_key == name_key and row.arrival_date and row.departure_date:
-                    stays.append(
-                        RoomStayContext(
-                            guest_id=guest.guest_id,
-                            match_name_key=name_key,
-                            arrival_date=row.arrival_date,
-                            departure_date=row.departure_date,
+
+def stage_run_exact_matching(ctx: RunContext) -> None:
+    """Run ExactNameDate matching against room stay contexts."""
+    with _timed(ctx, "run_exact_matching"):
+        stays = _build_stays(ctx)
+        results = list(getattr(ctx, "_match_results", []))
+        matched_spa = set(getattr(ctx, "_matched_spa_row_ids", set()))
+        matched_dining = set(getattr(ctx, "_matched_dining_row_ids", set()))
+
+        for source_rows in (ctx.spa_canonical, ctx.dining_canonical):
+            for row in source_rows:
+                if not row.match_name_key or not row.activity_date:
+                    continue
+                candidate = ExactMatchCandidate(
+                    guest_id="",
+                    match_name_key=row.match_name_key,
+                    activity_date=row.activity_date,
+                )
+                act_key = make_activity_source_key(row.source_system, row.source_row_id)
+                exact = match_exact_name_date(candidate, stays, ctx.date_tolerance_days)
+                if exact:
+                    results.append(
+                        make_exact_result(
+                            exact.stay.guest_id,
+                            row.source_system,
+                            act_key,
+                            row.activity_date,
+                            row.activity_time,
                         )
                     )
-                    guest_by_key[name_key] = guest.guest_id
-                    break  # one stay context per guest
+                    if row.source_system == "spa":
+                        matched_spa.add(row.source_row_id)
+                    else:
+                        matched_dining.add(row.source_row_id)
+                    continue
 
-        results = []
-        matched_spa_keys: set[str] = set()
-        matched_dining_keys: set[str] = set()
-
-        # Match spa rows
-        for spa_row in ctx.spa_canonical:
-            if not spa_row.match_name_key or not spa_row.activity_date:
-                continue
-            candidate = ExactMatchCandidate(
-                guest_id="",
-                match_name_key=spa_row.match_name_key,
-                activity_date=spa_row.activity_date,
-            )
-            act_key = make_activity_source_key(spa_row.source_system, spa_row.source_row_id)
-
-            # Try exact match first
-            exact = match_exact_name_date(candidate, stays, ctx.date_tolerance_days)
-            if exact:
-                results.append(make_exact_result(
-                    exact.stay.guest_id, spa_row.source_system, act_key,
-                    spa_row.activity_date, spa_row.activity_time,
-                ))
-                matched_spa_keys.add(spa_row.source_row_id)
-                continue
-
-            # Try fuzzy
-            ambiguous = are_fuzzy_scores_ambiguous(
-                candidate, stays,
-                score_cutoff=ctx.fuzzy_score_cutoff,
-                tolerance_days=ctx.date_tolerance_days,
-            )
-            if len(ambiguous) == 1:
-                results.append(make_fuzzy_result(
-                    ambiguous[0].stay.guest_id, spa_row.source_system, act_key,
-                    spa_row.activity_date, ambiguous[0].score, spa_row.activity_time,
-                ))
-                matched_spa_keys.add(spa_row.source_row_id)
-            elif len(ambiguous) > 1:
-                ctx.qa_possible_matches.extend(
-                    collect_ambiguous_fuzzy(
-                        spa_row.source_system, act_key, ambiguous,
-                        spa_row.activity_date, spa_row.match_name_key,
+                same_name_outside = [
+                    s for s in stays if s.match_name_key == row.match_name_key
+                ]
+                if same_name_outside:
+                    ctx.qa_possible_matches.append(
+                        collect_outside_stay_window(
+                            source_system=row.source_system,
+                            source_activity_key=act_key,
+                            guest_id=same_name_outside[0].guest_id,
+                            score=1.0,
+                            activity_date=row.activity_date,
+                            left_name_key=row.match_name_key,
+                            right_name_key=same_name_outside[0].match_name_key,
+                        )
                     )
+
+        ctx._match_results = results
+        ctx._matched_spa_row_ids = matched_spa
+        ctx._matched_dining_row_ids = matched_dining
+        logger.info("Exact matching complete: %d links", len(results))
+
+
+def stage_run_fuzzy_matching(ctx: RunContext) -> None:
+    """Run FuzzyNameDate matching for still-unmatched activity rows."""
+    with _timed(ctx, "run_fuzzy_matching"):
+        stays = _build_stays(ctx)
+        results = list(getattr(ctx, "_match_results", []))
+        matched_spa = set(getattr(ctx, "_matched_spa_row_ids", set()))
+        matched_dining = set(getattr(ctx, "_matched_dining_row_ids", set()))
+
+        for source_rows in (ctx.spa_canonical, ctx.dining_canonical):
+            for row in source_rows:
+                if not row.match_name_key or not row.activity_date:
+                    continue
+                if row.source_system == "spa" and row.source_row_id in matched_spa:
+                    continue
+                if row.source_system == "dining" and row.source_row_id in matched_dining:
+                    continue
+
+                candidate = ExactMatchCandidate(
+                    guest_id="",
+                    match_name_key=row.match_name_key,
+                    activity_date=row.activity_date,
+                )
+                act_key = make_activity_source_key(row.source_system, row.source_row_id)
+                ambiguous = are_fuzzy_scores_ambiguous(
+                    candidate,
+                    stays,
+                    score_cutoff=ctx.fuzzy_score_cutoff,
+                    tolerance_days=ctx.date_tolerance_days,
+                    ambiguity_margin=ctx.fuzzy_ambiguity_margin,
                 )
 
-        # Match dining rows
-        for din_row in ctx.dining_canonical:
-            if not din_row.match_name_key or not din_row.activity_date:
-                continue
-            candidate = ExactMatchCandidate(
-                guest_id="",
-                match_name_key=din_row.match_name_key,
-                activity_date=din_row.activity_date,
-            )
-            act_key = make_activity_source_key(din_row.source_system, din_row.source_row_id)
-
-            exact = match_exact_name_date(candidate, stays, ctx.date_tolerance_days)
-            if exact:
-                results.append(make_exact_result(
-                    exact.stay.guest_id, din_row.source_system, act_key,
-                    din_row.activity_date, din_row.activity_time,
-                ))
-                matched_dining_keys.add(din_row.source_row_id)
-                continue
-
-            ambiguous = are_fuzzy_scores_ambiguous(
-                candidate, stays,
-                score_cutoff=ctx.fuzzy_score_cutoff,
-                tolerance_days=ctx.date_tolerance_days,
-            )
-            if len(ambiguous) == 1:
-                results.append(make_fuzzy_result(
-                    ambiguous[0].stay.guest_id, din_row.source_system, act_key,
-                    din_row.activity_date, ambiguous[0].score, din_row.activity_time,
-                ))
-                matched_dining_keys.add(din_row.source_row_id)
-            elif len(ambiguous) > 1:
-                ctx.qa_possible_matches.extend(
-                    collect_ambiguous_fuzzy(
-                        din_row.source_system, act_key, ambiguous,
-                        din_row.activity_date, din_row.match_name_key,
+                if len(ambiguous) == 1:
+                    results.append(
+                        make_fuzzy_result(
+                            ambiguous[0].stay.guest_id,
+                            row.source_system,
+                            act_key,
+                            row.activity_date,
+                            ambiguous[0].score,
+                            row.activity_time,
+                        )
                     )
-                )
+                    if row.source_system == "spa":
+                        matched_spa.add(row.source_row_id)
+                    else:
+                        matched_dining.add(row.source_row_id)
+                elif len(ambiguous) > 1:
+                    ctx.qa_possible_matches.extend(
+                        collect_ambiguous_fuzzy(
+                            row.source_system,
+                            act_key,
+                            ambiguous,
+                            row.activity_date,
+                            row.match_name_key,
+                        )
+                    )
 
-        # Update dim_guest activity counts
+        ctx._match_results = results
+        ctx._matched_spa_row_ids = matched_spa
+        ctx._matched_dining_row_ids = matched_dining
+        logger.info("Fuzzy matching complete: %d cumulative links", len(results))
+
+
+def stage_apply_support_signals(ctx: RunContext) -> None:
+    """Apply phone and repeated-pattern support signals; finalize match outputs."""
+    with _timed(ctx, "apply_support_signals"):
+        results = list(getattr(ctx, "_match_results", []))
+        matched_spa = set(getattr(ctx, "_matched_spa_row_ids", set()))
+        matched_dining = set(getattr(ctx, "_matched_dining_row_ids", set()))
+
+        rooms_by_name = {
+            row.match_name_key: row
+            for row in ctx.rooms_canonical
+            if row.match_name_key
+        }
+        guest_contexts = [
+            GuestPhoneContext(
+                guest_id=guest.guest_id,
+                match_name_key=name_key,
+                match_phone_key=rooms_by_name.get(name_key).match_phone_key if rooms_by_name.get(name_key) else None,
+            )
+            for name_key, guest in ctx.dim_guests.items()
+        ]
+        result_by_activity = {r.source_activity_key: r for r in results}
+
+        for source_rows in (ctx.spa_canonical, ctx.dining_canonical):
+            for row in source_rows:
+                act_key = make_activity_source_key(row.source_system, row.source_row_id)
+                candidate = PhoneMatchCandidate(
+                    source_system=row.source_system,
+                    source_activity_key=act_key,
+                    match_name_key=row.match_name_key,
+                    match_phone_key=getattr(row, "match_phone_key", None),
+                    activity_date=row.activity_date,
+                )
+                phone_candidates = find_phone_support_candidates(candidate, guest_contexts)
+                if act_key in result_by_activity and phone_candidates:
+                    result_by_activity[act_key] = add_phone_support(result_by_activity[act_key])
+                elif phone_candidates:
+                    best_guest, reason = phone_candidates[0]
+                    if reason == "DifferentLastNameSharedPhone":
+                        ctx.qa_possible_matches.append(
+                            collect_shared_phone_different_name(
+                                source_system=row.source_system,
+                                source_activity_key=act_key,
+                                guest_id=best_guest.guest_id,
+                                activity_date=row.activity_date,
+                                left_name_key=row.match_name_key,
+                                right_name_key=best_guest.match_name_key,
+                                phone_key=row.match_phone_key,
+                            )
+                        )
+
+        # Repeated cross-source unmatched activity pattern detection
+        unmatched_spa_rows = [r for r in ctx.spa_canonical if r.source_row_id not in matched_spa]
+        unmatched_dining_rows = [r for r in ctx.dining_canonical if r.source_row_id not in matched_dining]
+        unmatched_records = [
+            ActivityRecord(
+                source_system=r.source_system,
+                source_activity_key=make_activity_source_key(r.source_system, r.source_row_id),
+                match_name_key=r.match_name_key,
+                match_phone_key=getattr(r, "match_phone_key", None),
+                activity_date=r.activity_date,
+            )
+            for r in [*unmatched_spa_rows, *unmatched_dining_rows]
+            if r.match_name_key
+        ]
+        for pattern in find_repeated_patterns(unmatched_records, min_occurrences=2):
+            ctx.qa_possible_matches.append(
+                build_possible_match_issue(
+                    source_system="multi_source",
+                    source_activity_key=pattern.activity_keys[0],
+                    candidate_guest_id="",
+                    reason="repeated_cross_source_pattern",
+                    score=None,
+                    match_method="RepeatedCrossSourcePattern",
+                    left_name_key=pattern.match_name_key,
+                    right_name_key=pattern.match_name_key,
+                )
+            )
+
+        results = list(result_by_activity.values())
         update_guest_activity_counts(ctx.dim_guests, results)
-
-        # Convert match results to BridgeGuestActivity
         ctx.bridge_guest_activity = [
             BridgeGuestActivity(
                 guest_id=r.guest_id,
@@ -373,20 +513,18 @@ def stage_run_matching(ctx: RunContext) -> None:
                 match_flag_fuzzy=r.match_flag_fuzzy,
                 matched_within_stay_window=r.matched_within_stay_window,
                 matched_by_phone_support=r.matched_by_phone_support,
+                outside_stay_window_flag=r.outside_stay_window_flag,
+                repeated_pattern_flag=r.repeated_pattern_flag,
                 qa_review_required=r.qa_review_required,
             )
             for r in results
         ]
 
-        # Collect unmatched
-        ctx.qa_unmatched_spa = collect_unmatched_spa(ctx.spa_canonical, matched_spa_keys)
-        ctx.qa_unmatched_dining = collect_unmatched_dining(ctx.dining_canonical, matched_dining_keys)
-
+        ctx.qa_unmatched_spa = collect_unmatched_spa(ctx.spa_canonical, matched_spa)
+        ctx.qa_unmatched_dining = collect_unmatched_dining(ctx.dining_canonical, matched_dining)
         logger.info(
-            "Matching complete: %d links (spa:%d dining:%d), unmatched spa:%d dining:%d",
+            "Support signals complete: %d links, unmatched spa:%d dining:%d",
             len(results),
-            len(matched_spa_keys),
-            len(matched_dining_keys),
             len(ctx.qa_unmatched_spa),
             len(ctx.qa_unmatched_dining),
         )

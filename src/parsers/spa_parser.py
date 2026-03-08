@@ -162,11 +162,10 @@ def _decode_stream(raw: bytes) -> str:
     try:
         return zlib.decompress(raw).decode("latin-1", errors="replace")
     except Exception:
-        pass
-    try:
-        return raw.decode("latin-1", errors="replace")
-    except Exception:
-        return ""
+        try:
+            return raw.decode("latin-1", errors="replace")
+        except Exception:
+            return ""
 
 
 def _extract_text_builtin(pdf_path: Path) -> str:
@@ -233,7 +232,7 @@ def parse_spa_pdf_file(pdf_path: Path) -> list[SpaAppointmentRaw]:
 
     # Built-in fallback
     text = _extract_text_builtin(pdf_path)
-    records = _parse_text_lines(text.splitlines(), file_name)
+    records = _parse_spasof_text(text, file_name)
     logger.info(
         "Extracted %d spa appointment rows from %s (built-in reader)",
         len(records), file_name,

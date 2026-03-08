@@ -81,6 +81,13 @@ def convert_spa_calendar_pdf_to_excel(pdf_path: Path, output_path: Path) -> Path
         import csv
         import dataclasses
         csv_path = output_path.with_suffix(".csv")
+        if not canonical_rows:
+            with open(csv_path, "w", newline="", encoding="utf-8") as fh:
+                writer = csv.writer(fh)
+                writer.writerow(["No appointments extracted"])
+            logger.warning("No appointments found in %s", pdf_path.name)
+            return csv_path
+
         headers = [f.name for f in dataclasses.fields(canonical_rows[0])]
         with open(csv_path, "w", newline="", encoding="utf-8") as fh:
             writer = csv.DictWriter(fh, fieldnames=headers)

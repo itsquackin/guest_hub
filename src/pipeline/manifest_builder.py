@@ -18,6 +18,12 @@ def build_run_summary(ctx: RunContext) -> QaRunSummary:
     return QaRunSummary(
         run_id=ctx.run_id,
         run_timestamp=ctx.run_timestamp,
+        rooms_files_loaded=len(getattr(ctx, "_room_files", [])),
+        spa_files_loaded=len(getattr(ctx, "_spa_files", [])),
+        dining_files_loaded=len(getattr(ctx, "_dining_files", [])),
+        rooms_raw_records=len(getattr(ctx, "_rooms_raw", [])),
+        spa_raw_records=len(getattr(ctx, "_spa_raw", [])),
+        dining_raw_records=len(getattr(ctx, "_dining_raw", [])),
         rooms_canonical_rows=len(ctx.rooms_canonical),
         spa_canonical_rows=len(ctx.spa_canonical),
         dining_canonical_rows=len(ctx.dining_canonical),
@@ -75,6 +81,7 @@ def write_run_manifest(ctx: RunContext, summary: QaRunSummary) -> Path:
             "name_issues": summary.name_issues,
             "phone_issues": summary.phone_issues,
             "lookup_issues": summary.lookup_issues,
+            "duplicate_issues": len(ctx.qa_duplicate_issues),
         },
         "errors": summary.parse_errors,
     }

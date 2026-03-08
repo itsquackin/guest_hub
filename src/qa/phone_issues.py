@@ -86,9 +86,13 @@ def find_shared_phone_keys(
     return {k for k, n in counts.items() if n > threshold}
 
 
-def check_rooms_phone_issues(rows: list[RoomsCanonicalRow]) -> list[QaPhoneIssue]:
+def check_rooms_phone_issues(
+    rows: list[RoomsCanonicalRow],
+    *,
+    threshold: int = 3,
+) -> list[QaPhoneIssue]:
     """Run phone QA across all rooms canonical rows."""
-    shared = find_shared_phone_keys(rows)  # type: ignore[arg-type]
+    shared = find_shared_phone_keys(rows, threshold=threshold)  # type: ignore[arg-type]
     issues: list[QaPhoneIssue] = []
     for row in rows:
         issues.extend(check_phone_quality(row, shared_phone_keys=shared))
@@ -96,9 +100,13 @@ def check_rooms_phone_issues(rows: list[RoomsCanonicalRow]) -> list[QaPhoneIssue
     return issues
 
 
-def check_dining_phone_issues(rows: list[DiningCanonicalRow]) -> list[QaPhoneIssue]:
+def check_dining_phone_issues(
+    rows: list[DiningCanonicalRow],
+    *,
+    threshold: int = 3,
+) -> list[QaPhoneIssue]:
     """Run phone QA across all dining canonical rows."""
-    shared = find_shared_phone_keys(rows)  # type: ignore[arg-type]
+    shared = find_shared_phone_keys(rows, threshold=threshold)  # type: ignore[arg-type]
     issues: list[QaPhoneIssue] = []
     for row in rows:
         issues.extend(check_phone_quality(row, shared_phone_keys=shared))

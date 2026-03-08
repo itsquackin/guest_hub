@@ -8,13 +8,7 @@ from __future__ import annotations
 import logging
 from pathlib import Path
 
-from src.utils.constants import (
-    ROOM_TYPE_CODE_COL,
-    ROOM_TYPE_DESC_COL,
-    SPECIAL_CODE_COL,
-    SPECIAL_DESC_COL,
-)
-from src.utils.file_utils import read_tsv
+from src.parsers.room_types_parser import parse_room_types_tsv, parse_specials_tsv
 
 logger = logging.getLogger(__name__)
 
@@ -28,12 +22,7 @@ def load_room_type_map(reference_dir: str | Path) -> dict[str, str]:
     if not path.exists():
         logger.warning("room_types.tsv not found at: %s", path)
         return {}
-    rows = read_tsv(path)
-    mapping = {
-        r[ROOM_TYPE_CODE_COL].strip().upper(): r[ROOM_TYPE_DESC_COL].strip()
-        for r in rows
-        if r.get(ROOM_TYPE_CODE_COL, "").strip()
-    }
+    mapping = parse_room_types_tsv(path)
     logger.info("Loaded %d room type codes from %s", len(mapping), path.name)
     return mapping
 
@@ -47,12 +36,7 @@ def load_special_request_map(reference_dir: str | Path) -> dict[str, str]:
     if not path.exists():
         logger.warning("special_requests.tsv not found at: %s", path)
         return {}
-    rows = read_tsv(path)
-    mapping = {
-        r[SPECIAL_CODE_COL].strip().upper(): r[SPECIAL_DESC_COL].strip()
-        for r in rows
-        if r.get(SPECIAL_CODE_COL, "").strip()
-    }
+    mapping = parse_specials_tsv(path)
     logger.info("Loaded %d special request codes from %s", len(mapping), path.name)
     return mapping
 

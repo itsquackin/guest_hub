@@ -47,6 +47,7 @@ def validate_canonical_outputs(
     spa_rows: list[SpaCanonicalRow],
     dining_rows: list[DiningCanonicalRow],
     lookup_issues: list[QaLookupIssue] | None = None,
+    shared_phone_threshold: int = 3,
 ) -> ValidationReport:
     """Run all QA checks and return a ValidationReport.
 
@@ -64,8 +65,12 @@ def validate_canonical_outputs(
     report.name_issues.extend(check_dining_name_issues(dining_rows))
 
     # Phone checks
-    report.phone_issues.extend(check_rooms_phone_issues(rooms_rows))
-    report.phone_issues.extend(check_dining_phone_issues(dining_rows))
+    report.phone_issues.extend(
+        check_rooms_phone_issues(rooms_rows, threshold=shared_phone_threshold)
+    )
+    report.phone_issues.extend(
+        check_dining_phone_issues(dining_rows, threshold=shared_phone_threshold)
+    )
 
     # Lookup issues (passed in from enrichment step)
     if lookup_issues:
