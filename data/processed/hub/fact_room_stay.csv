@@ -1,0 +1,4 @@
+confirmation_number,arrival_date,departure_date,nights,rate_code,nightly_rate,room_type_code,room_type_description,assigned_room_type_code,assigned_room_type_description,company_raw,reservation_status_raw,specials_raw,vip_status_raw,last_stay_date,last_room_raw
+RES-001,2025-01-10,2025-01-13,3,RACK,250.0,DLX,Deluxe Room,DLX-K,Deluxe King,Acme Corp,Confirmed,"OCA,HNY",VIP1,2024-06-15,204
+RES-002,2025-01-11,2025-01-14,3,AAA,180.0,STD,Standard Room,STD-Q,Standard Queen,,Confirmed,HNY,,,
+RES-003,2025-01-12,2025-01-15,3,GOV,320.0,STE-JR,Junior Suite,STE-JR,Junior Suite,,Confirmed,ANN;FLR,,2024-08-20,512

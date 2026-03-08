@@ -1,0 +1,4 @@
+phone_id,phone_clean,phone_raw_example,linked_guest_count,is_shared_phone,is_international_like,is_incomplete_like,is_valid_like
+P-A179CDA28360,5551234567,5551234567,3,True,False,False,True
+P-C5BDD64FBDD7,5559876543,5559876543,1,False,False,False,True
+P-C10F05DA5A67,5557654321,5557654321,3,True,False,False,True

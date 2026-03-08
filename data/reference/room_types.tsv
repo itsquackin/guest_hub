@@ -1,1 +1,20 @@
 room_type_code	room_type_description
+DLX	Deluxe Room
+STD	Standard Room
+STE	Suite
+KNG	King Room
+DBL	Double Room
+QN	Queen Room
+DLX-K	Deluxe King
+DLX-Q	Deluxe Queen
+STD-Q	Standard Queen
+STD-K	Standard King
+STE-1BR	One-Bedroom Suite
+STE-2BR	Two-Bedroom Suite
+STE-JR	Junior Suite
+PH	Penthouse
+VIL	Villa
+CAB	Cabana
+OCN	Ocean View Room
+MTN	Mountain View Room
+ADA	ADA Accessible Room

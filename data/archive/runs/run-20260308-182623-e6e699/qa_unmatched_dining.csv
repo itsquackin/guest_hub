@@ -1,0 +1,2 @@
+source_system,source_row_id,guest_name_raw,match_name_key,activity_date,reason
+dining,sample_dining:000004,Wilson Robert,robert|wilson,2025-01-14,no_confident_match

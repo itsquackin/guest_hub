@@ -1,0 +1,40 @@
+{
+  "run_id": "run-20260308-182623-e6e699",
+  "run_timestamp": "2026-03-08T18:26:23Z",
+  "stage_times_seconds": {
+    "load_raw_sources": 0.005,
+    "load_reference_tables": 0.002,
+    "parse_rooms_xml": 0.002,
+    "parse_spa_pdf": 0.0,
+    "parse_dining_csv": 0.004,
+    "standardize_expand_enrich_rooms": 0.004,
+    "standardize_spa": 0.0,
+    "standardize_dining": 0.001,
+    "run_qa_validations": 0.003,
+    "build_guest_phone_dimensions": 0.001,
+    "run_matching": 0.002,
+    "build_fact_room_stay": 0.001
+  },
+  "counts": {
+    "rooms_canonical_rows": 7,
+    "spa_canonical_rows": 0,
+    "dining_canonical_rows": 4,
+    "rooms_primary_guests": 3,
+    "rooms_accompanying_guests": 4,
+    "dim_guest_rows": 7,
+    "dim_phone_rows": 3,
+    "fact_room_stay_rows": 3,
+    "bridge_guest_activity_rows": 3,
+    "exact_matches": 3,
+    "fuzzy_matches": 0,
+    "possible_matches_flagged": 0,
+    "unmatched_spa": 0,
+    "unmatched_dining": 1
+  },
+  "qa_issues": {
+    "name_issues": 1,
+    "phone_issues": 5,
+    "lookup_issues": 0
+  },
+  "errors": []
+}

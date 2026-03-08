@@ -1,0 +1,8 @@
+guest_id,confirmation_number,reservation_guest_key,guest_role,is_primary_reservation_guest,phone_is_inherited,link_source
+G-7C0C88729F45,RES-001,RES-001#1,Primary,True,False,rooms_canonical
+G-B38239F7E72B,RES-001,RES-001#2,Accompanying,False,True,rooms_canonical
+G-2AB6AE28F0EE,RES-001,RES-001#3,Accompanying,False,True,rooms_canonical
+G-45CD0F7AE52B,RES-002,RES-002#1,Primary,True,False,rooms_canonical
+G-6B5F16742123,RES-003,RES-003#1,Primary,True,False,rooms_canonical
+G-01F8A6CA9DC1,RES-003,RES-003#2,Accompanying,False,True,rooms_canonical
+G-59D5E6E51DAF,RES-003,RES-003#3,Accompanying,False,True,rooms_canonical

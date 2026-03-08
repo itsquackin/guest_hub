@@ -1,2 +1,37 @@
 version: 1
-# TODO: define settings
+
+rooms:
+  raw_directory: data/raw/rooms
+  file_glob: "*.xml"
+  encoding: utf-8
+  # XML element name that wraps each reservation block
+  reservation_element: room
+  # Root element name
+  root_element: rooms
+  # Strategy for reading field values: "element" (child elements named C18 etc.)
+  # or "attribute" (elements with id="C18" attribute)
+  field_strategy: element
+
+spa:
+  raw_directory: data/raw/spa
+  file_glob: "*.pdf"
+  # PDF text extraction backend: "pdfplumber" (default)
+  extraction_backend: pdfplumber
+  # Column header patterns used to detect the appointment table
+  header_patterns:
+    - "Guest"
+    - "Service"
+    - "Time"
+    - "Date"
+    - "Duration"
+  # Minimum text length on a page for it to be considered content-bearing
+  min_page_text_length: 50
+
+dining:
+  raw_directory: data/raw/dining
+  file_glob: "*.csv"
+  encoding: utf-8-sig
+  # Whether the CSV has a header row
+  has_header: true
+  # Delimiter character
+  delimiter: ","
