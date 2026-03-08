@@ -147,10 +147,11 @@ def parse_room_xml_file(xml_path: Path) -> list[RoomRawRecord]:
 
     root = tree.getroot()
 
-    # Find all reservation elements — support both <room> and <reservation>
+    # Find all reservation elements — search recursively to handle nested
+    # structures like Oracle Reports <OSR_LANDSCAPE><LIST_G_C9><G_C9>
     reservation_tag = None
-    for tag in ("room", "reservation", "Reservation", "Room"):
-        if root.find(tag) is not None:
+    for tag in ("G_C9", "room", "reservation", "Reservation", "Room"):
+        if root.find(".//" + tag) is not None:
             reservation_tag = tag
             break
 
@@ -163,7 +164,7 @@ def parse_room_xml_file(xml_path: Path) -> list[RoomRawRecord]:
             logger.warning("No reservation elements found in %s", file_name)
             return []
     else:
-        reservation_elements = root.findall(reservation_tag)
+        reservation_elements = root.findall(".//" + reservation_tag)
 
     if not reservation_elements:
         logger.warning("No <%s> elements found in %s", reservation_tag, file_name)
