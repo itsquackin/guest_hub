@@ -1,2 +1,3 @@
-# Placeholder requirements
-# TODO: add runtime dependencies
+# Runtime dependencies are intentionally minimal during scaffolding.
+# TODO: add parser/matching dependencies as implementation proceeds.
+pytest>=8.0
