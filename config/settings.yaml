@@ -1,0 +1,28 @@
+version: 1
+project_name: guest_hub
+date_window_tolerance_days: 1
+
+paths:
+  raw_rooms: data/raw/rooms
+  raw_spa: data/raw/spa
+  raw_dining: data/raw/dining
+  reference: data/reference
+  interim: data/interim
+  processed: data/processed
+
+pipeline:
+  stages:
+    - load_raw_sources
+    - load_reference_tables
+    - parse_rooms_xml
+    - parse_spa_pdf
+    - parse_dining_csv
+    - standardize_shared_fields
+    - expand_room_guests
+    - enrich_room_lookups
+    - write_canonical_outputs
+    - run_qa
+    - match_exact
+    - match_fuzzy
+    - build_hub_outputs
+    - export_package

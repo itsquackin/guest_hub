@@ -1,0 +1,19 @@
+version: 1
+primary_methods:
+  - ExactNameDate
+  - FuzzyNameDate
+
+supporting_signals:
+  - PhoneSupport
+  - OutsideStayWindow
+  - RepeatedCrossSourcePattern
+  - SameLastNameNearStay
+  - DifferentLastNameSharedPhone
+
+date_window:
+  tolerance_days: 1
+
+fuzzy:
+  enabled: true
+  score_cutoff: 0.88
+  flag_fuzzy_matches: true
