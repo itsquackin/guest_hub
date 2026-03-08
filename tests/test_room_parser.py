@@ -145,3 +145,61 @@ class TestRoomCodeMap:
 
     def test_accompanying_guest_code(self):
         assert ROOM_CODE_MAP["C27"] == "accompanying_guest_raw"
+
+    def test_oracle_reports_g_c9_structure_parsed(self, tmp_path):
+        xml = textwrap.dedent("""\
+            <?xml version="1.0" encoding="UTF-8"?>
+            <OSR_LANDSCAPE>
+              <LIST_G_C9>
+                <G_C9>
+                  <C18>1512782</C18>
+                  <C21>Gile</C21>
+                  <C24>Trevor</C24>
+                  <C30>08-MAR-26</C30>
+                  <C33>09-MAR-26</C33>
+                  <C93>+64276140220</C93>
+                </G_C9>
+                <G_C9>
+                  <C18>1516790</C18>
+                  <C21>Room Move Planzer</C21>
+                  <C24>Nils</C24>
+                  <C30>08-MAR-26</C30>
+                  <C33>12-MAR-26</C33>
+                  <C93>41796890794</C93>
+                </G_C9>
+              </LIST_G_C9>
+            </OSR_LANDSCAPE>
+        """)
+        f = tmp_path / "oracle_reports.xml"
+        f.write_text(xml)
+
+        records = parse_room_xml_file(f)
+
+        assert len(records) == 2
+        assert records[0].fields["confirmation_number"] == "1512782"
+        assert records[0].fields["last_name_raw"] == "Gile"
+        assert records[1].fields["confirmation_number"] == "1516790"
+
+    def test_oracle_reports_namespaced_g_c9_structure_parsed(self, tmp_path):
+        xml = textwrap.dedent("""\
+            <?xml version="1.0" encoding="UTF-8"?>
+            <OSR_LANDSCAPE xmlns="urn:oracle:reports">
+              <LIST_G_C9>
+                <G_C9>
+                  <C18>1500571</C18>
+                  <C21>Hanasono</C21>
+                  <C24>Matthew</C24>
+                  <C93>713-204-7441</C93>
+                </G_C9>
+              </LIST_G_C9>
+            </OSR_LANDSCAPE>
+        """)
+        f = tmp_path / "oracle_reports_ns.xml"
+        f.write_text(xml)
+
+        records = parse_room_xml_file(f)
+
+        assert len(records) == 1
+        assert records[0].fields["confirmation_number"] == "1500571"
+        assert records[0].fields["first_name_raw"] == "Matthew"
+        assert records[0].fields["phone_raw"] == "713-204-7441"

@@ -67,11 +67,29 @@ class RoomRawRecord:
     fields: dict[str, Any]
 
 
+
+def _local_name(tag: str) -> str:
+    """Return local XML tag name with namespace prefix removed."""
+    if "}" in tag:
+        return tag.split("}", 1)[1]
+    return tag
+
+
+def _children_by_local_name(parent: ET.Element) -> dict[str, ET.Element]:
+    """Map child local tag name to child element (first occurrence)."""
+    out: dict[str, ET.Element] = {}
+    for child in parent:
+        key = _local_name(child.tag)
+        out.setdefault(key, child)
+    return out
+
+
 def _extract_fields_element_strategy(room_el: ET.Element) -> dict[str, str]:
     """Extract fields where child element tags are the C-codes (e.g. <C18>)."""
     fields: dict[str, str] = {}
+    children = _children_by_local_name(room_el)
     for code, canonical in ROOM_CODE_MAP.items():
-        child = room_el.find(code)
+        child = children.get(code)
         if child is not None:
             fields[canonical] = (child.text or "").strip()
     return fields
@@ -94,9 +112,9 @@ def _extract_fields_attribute_strategy(room_el: ET.Element) -> dict[str, str]:
 
 
 def _detect_strategy(room_el: ET.Element) -> str:
-    """Return 'element' or 'attribute' based on the first child element."""
+    """Return 'element' or 'attribute' based on child element shape."""
     for child in room_el:
-        if child.tag in ROOM_CODE_MAP:
+        if _local_name(child.tag) in ROOM_CODE_MAP:
             return "element"
         if child.get("id", "").strip() in ROOM_CODE_MAP:
             return "attribute"
@@ -147,28 +165,22 @@ def parse_room_xml_file(xml_path: Path) -> list[RoomRawRecord]:
 
     root = tree.getroot()
 
-    # Find all reservation elements — search recursively to handle nested
-    # structures like Oracle Reports <OSR_LANDSCAPE><LIST_G_C9><G_C9>
-    reservation_tag = None
-    for tag in ("G_C9", "room", "reservation", "Reservation", "Room"):
-        if root.find(".//" + tag) is not None:
-            reservation_tag = tag
-            break
+    # Find all reservation elements — iterate to support namespaced and nested
+    # structures like Oracle Reports <OSR_LANDSCAPE><LIST_G_C9><G_C9>.
+    reservation_tags = {"G_C9", "room", "reservation", "Reservation", "Room"}
+    reservation_elements = [
+        el for el in root.iter()
+        if _local_name(el.tag) in reservation_tags
+    ]
 
-    if reservation_tag is None:
+    if not reservation_elements:
         # Maybe root IS the reservation
         children = list(root)
-        if children and (children[0].tag in ROOM_CODE_MAP or children[0].get("id", "") in ROOM_CODE_MAP):
+        if children and (_local_name(children[0].tag) in ROOM_CODE_MAP or children[0].get("id", "") in ROOM_CODE_MAP):
             reservation_elements = [root]
         else:
             logger.warning("No reservation elements found in %s", file_name)
             return []
-    else:
-        reservation_elements = root.findall(".//" + reservation_tag)
-
-    if not reservation_elements:
-        logger.warning("No <%s> elements found in %s", reservation_tag, file_name)
-        return []
 
     # Detect field strategy from the first element
     strategy = _detect_strategy(reservation_elements[0])
