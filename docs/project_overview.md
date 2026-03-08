@@ -22,7 +22,7 @@ The design keeps source parsing separate from matching and emphasizes explainabl
 
 ## Implementation status
 
-All three phases are complete and the pipeline is MVP-ready:
+Core phases are implemented in code, with ongoing hardening around config-driven behavior and integration-test depth:
 
 - **Phase 1 (canonical foundation)**: rooms_canonical, spa_canonical, dining_canonical, room type/specials enrichment, QA name/phone flags
 - **Phase 2 (identity + linking)**: dim_guest, dim_phone, bridge_guest_activity, ExactNameDate + FuzzyNameDate matching, QA possible matches, unmatched outputs

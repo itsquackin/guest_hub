@@ -69,6 +69,7 @@ def export_excel(ctx: RunContext, filename: str = "guest_hub_delivery.xlsx") -> 
     _write_sheet(wb, "bridge_guest_room_stay",  ctx.bridge_guest_room_stay)
     _write_sheet(wb, "qa_name_issues",          ctx.qa_name_issues)
     _write_sheet(wb, "qa_phone_issues",         ctx.qa_phone_issues)
+    _write_sheet(wb, "qa_duplicate_issues",     ctx.qa_duplicate_issues)
     _write_sheet(wb, "qa_possible_matches",     ctx.qa_possible_matches)
     _write_sheet(wb, "qa_unmatched_spa",        ctx.qa_unmatched_spa)
     _write_sheet(wb, "qa_unmatched_dining",     ctx.qa_unmatched_dining)

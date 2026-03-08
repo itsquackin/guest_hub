@@ -40,6 +40,8 @@ possible_matches:
   # Fuzzy score range that triggers QA instead of automatic link
   # Matches above score_cutoff go through; below min_score are dropped
   min_score_for_qa: 0.75
+  # If top fuzzy candidates are this close, route to qa_possible_matches
+  ambiguity_margin: 0.03
   # Reason codes to include in qa_possible_matches
   include_reasons:
     - fuzzy_only

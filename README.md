@@ -68,7 +68,7 @@ guest_hub/
 │   ├── pipeline/              # RunContext, stages, orchestrator, manifest builder
 │   ├── outputs/               # CSV, Excel, JSON exporters + run packager
 │   └── legacy/                # spa_calendar_converter (standalone CLI)
-├── tests/                     # 176 unit tests across all layers
+├── tests/                     # 178 unit tests across all layers
 ├── docs/                      # business_rules, source_dictionary, qa_checklist, runbook
 ├── run_pipeline.py            # Main pipeline CLI entry point
 └── run_spa_legacy.py          # Legacy spa PDF → Excel CLI
@@ -118,7 +118,7 @@ The pipeline runs 18 named stages in order:
 pytest tests/ -q
 ```
 
-176 tests covering: name/phone cleaning, XML parsing, guest expansion, room enrichment, dining CSV parsing, stay-window logic, fuzzy matching, and QA possible-match collection.
+178 tests covering: name/phone cleaning, XML parsing, guest expansion, room enrichment, dining CSV parsing, stay-window logic, fuzzy matching, and QA possible-match collection.
 
 ---
 
@@ -127,7 +127,7 @@ pytest tests/ -q
 All thresholds and file paths are in `config/`. Key settings:
 
 - `settings.yaml` → `date_window_tolerance_days: 1`
-- `matching_rules.yaml` → `fuzzy_score_cutoff: 0.88`, `ambiguity_margin: 0.03`
+- `matching_rules.yaml` → `fuzzy.score_cutoff: 0.88`, `date_window.tolerance_days: 1`
 - `qa_rules.yaml` → shared-phone threshold, incomplete-name check toggle
 
 See `docs/business_rules.md` for the full locked rule set and `docs/runbook.md` for operational guidance.
