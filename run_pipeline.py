@@ -20,17 +20,67 @@ from pathlib import Path
 
 
 def _load_config(config_path: str) -> dict:
+    path = Path(config_path)
     try:
         import yaml
         with open(config_path) as fh:
             return yaml.safe_load(fh) or {}
     except ImportError:
+        if path.suffix.lower() in {".yaml", ".yml"}:
+            print(
+                f"PyYAML not installed; using default runtime config for {config_path}",
+                file=sys.stderr,
+            )
+            return {}
         import json
         with open(config_path) as fh:
             return json.load(fh)
     except FileNotFoundError:
         print(f"Config file not found: {config_path}", file=sys.stderr)
         return {}
+
+
+def _load_yaml_file(path: Path) -> dict:
+    """Load a YAML config file into a dict; return empty dict if missing."""
+    try:
+        import yaml
+    except ImportError:
+        print(f"PyYAML not installed; cannot load YAML config: {path}", file=sys.stderr)
+        return {}
+
+    try:
+        with open(path) as fh:
+            return yaml.safe_load(fh) or {}
+    except FileNotFoundError:
+        print(f"Config overlay not found: {path}", file=sys.stderr)
+        return {}
+    except Exception as exc:
+        print(f"Unable to load YAML config {path}: {exc}", file=sys.stderr)
+        return {}
+
+
+def _compose_runtime_config(settings_path: str) -> dict:
+    """Compose settings with matching/QA/source/column-map config overlays."""
+    settings_file = Path(settings_path)
+    base = _load_config(str(settings_file))
+
+    candidate_dirs = [settings_file.parent, Path("config")]
+    overlay_names = {
+        "matching": "matching_rules.yaml",
+        "qa": "qa_rules.yaml",
+        "source_rules": "source_rules.yaml",
+        "column_maps": "column_maps.yaml",
+    }
+    for key, file_name in overlay_names.items():
+        overlay = {}
+        for cfg_dir in candidate_dirs:
+            candidate = cfg_dir / file_name
+            if candidate.exists():
+                overlay = _load_yaml_file(candidate)
+                break
+        base[key] = overlay
+
+    return base
 
 
 def main() -> int:
@@ -67,7 +117,7 @@ def main() -> int:
     logger.info("Guest Hub pipeline starting")
 
     # Load config and build run context
-    config = _load_config(args.config)
+    config = _compose_runtime_config(args.config)
     from src.pipeline.run_context import RunContext
     ctx = RunContext.from_config(config)
 

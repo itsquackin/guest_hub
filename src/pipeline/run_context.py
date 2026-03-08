@@ -39,6 +39,9 @@ class RunContext:
     # Matching settings
     date_tolerance_days: int = 1
     fuzzy_score_cutoff: float = 0.88
+    fuzzy_ambiguity_margin: float = 0.03
+    shared_phone_threshold: int = 3
+    pipeline_stages: list[str] = field(default_factory=list)
 
     # Mutable canonical outputs (populated during pipeline run)
     rooms_canonical: list = field(default_factory=list)
@@ -60,6 +63,7 @@ class RunContext:
     qa_name_issues: list = field(default_factory=list)
     qa_phone_issues: list = field(default_factory=list)
     qa_lookup_issues: list = field(default_factory=list)
+    qa_duplicate_issues: list = field(default_factory=list)
     qa_possible_matches: list = field(default_factory=list)
     qa_unmatched_spa: list = field(default_factory=list)
     qa_unmatched_dining: list = field(default_factory=list)
@@ -68,11 +72,22 @@ class RunContext:
     stage_times: dict[str, float] = field(default_factory=dict)
     errors: list[str] = field(default_factory=list)
 
+    # Internal pipeline scratch state (cross-stage matching work products)
+    _match_results: list = field(default_factory=list)
+    _matched_spa_row_ids: set[str] = field(default_factory=set)
+    _matched_dining_row_ids: set[str] = field(default_factory=set)
+
     @classmethod
     def from_config(cls, config: dict) -> "RunContext":
         """Construct a RunContext from a parsed settings.yaml dict."""
         paths = config.get("paths", {})
         matching = config.get("matching", {})
+        qa = config.get("qa", {})
+        phone_qa = qa.get("phone_issues", {})
+        fuzzy = matching.get("fuzzy", {})
+        possible = qa.get("possible_matches", {})
+        date_window = matching.get("date_window", {})
+        pipeline_cfg = config.get("pipeline", {})
         return cls(
             raw_rooms_dir=Path(paths.get("raw_rooms", "data/raw/rooms")),
             raw_spa_dir=Path(paths.get("raw_spa", "data/raw/spa")),
@@ -83,6 +98,12 @@ class RunContext:
             qa_dir=Path(paths.get("qa", "data/processed/qa")),
             archive_dir=Path(paths.get("archive_runs", "data/archive/runs")),
             interim_dir=Path(paths.get("interim_rooms", "data/interim")).parent,
-            date_tolerance_days=config.get("date_window_tolerance_days", 1),
-            fuzzy_score_cutoff=matching.get("score_cutoff", 0.88),
+            date_tolerance_days=date_window.get(
+                "tolerance_days",
+                config.get("date_window_tolerance_days", 1),
+            ),
+            fuzzy_score_cutoff=fuzzy.get("score_cutoff", matching.get("score_cutoff", 0.88)),
+            fuzzy_ambiguity_margin=possible.get("ambiguity_margin", 0.03),
+            shared_phone_threshold=phone_qa.get("shared_phone_guest_threshold", 3),
+            pipeline_stages=list(pipeline_cfg.get("stages", [])),
         )

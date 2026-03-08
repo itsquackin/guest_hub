@@ -1,4 +1,4 @@
-"""Room enrichment stubs for room type and specials lookups."""
+"""Room enrichment for room type and specials lookups."""
 
 from __future__ import annotations
 

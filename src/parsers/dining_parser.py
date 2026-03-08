@@ -15,8 +15,6 @@ from pathlib import Path
 from typing import Any
 
 from src.utils.id_utils import make_source_row_id
-from src.utils.file_utils import read_csv
-
 logger = logging.getLogger(__name__)
 
 # ── Revenue columns to strip (business rule: locked) ─────────────────────────

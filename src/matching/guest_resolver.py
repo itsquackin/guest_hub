@@ -105,6 +105,7 @@ def update_guest_activity_counts(
             if guest.last_seen_date is None or result.activity_date > guest.last_seen_date:
                 guest.last_seen_date = result.activity_date
 
-        # Elevate identity status for fuzzy-only links
+        # Room-derived identities remain Confirmed; fuzzy-linked activity does not
+        # downgrade confidence in this v1 model.
         if result.match_flag_fuzzy and guest.identity_status == IDENTITY_CONFIRMED:
-            pass  # room-based guests stay Confirmed; fuzzy activity doesn't downgrade
+            guest.identity_status = IDENTITY_CONFIRMED
