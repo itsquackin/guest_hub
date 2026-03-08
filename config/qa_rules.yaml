@@ -1,2 +1,48 @@
 version: 1
-# TODO: define settings
+
+# Thresholds and routing rules for QA flag generation.
+
+name_issues:
+  # Flag names where both first and last are blank
+  flag_both_blank: true
+  # Flag names where only one part is present
+  flag_partial_name: true
+  # Flag first-name fields that appear to contain more than one person
+  flag_multi_name_in_first: true
+  # Minimum character count to consider a name token valid
+  min_name_token_length: 1
+
+phone_issues:
+  # Flag records where the phone field is blank/null
+  flag_blank_phones: true
+  # Flag phones inherited from the primary reservation guest
+  flag_inherited_phones: true
+  # Flag phones shared across more than this many guests
+  shared_phone_guest_threshold: 3
+  # Flag phones with fewer than this many digits as incomplete
+  min_digits_for_valid: 7
+  # Flag phones with more than 11 digits as international-like
+  max_digits_domestic: 11
+
+lookup_issues:
+  # Flag room-type codes not found in the reference table
+  flag_unknown_room_type: true
+  # Flag special-request codes not found in the reference table
+  flag_unknown_specials: true
+
+duplicate_checks:
+  # Flag duplicate confirmation_number + guest_sequence combinations
+  check_reservation_guest_duplicates: true
+  # Flag duplicate match_name_key + arrival_date within the same source
+  check_name_date_duplicates: true
+
+possible_matches:
+  # Fuzzy score range that triggers QA instead of automatic link
+  # Matches above score_cutoff go through; below min_score are dropped
+  min_score_for_qa: 0.75
+  # Reason codes to include in qa_possible_matches
+  include_reasons:
+    - fuzzy_only
+    - same_phone_different_last_name
+    - same_name_outside_stay_window
+    - same_last_similar_first

@@ -1,2 +1,70 @@
 version: 1
-# TODO: define settings
+
+# Mapping of coded XML field names to canonical field names for the Rooms source.
+# These correspond to the locked business-rule field codes in spec section 2.
+rooms_xml_code_map:
+  C9:   booked_by_raw
+  C15:  booked_on_raw
+  C18:  confirmation_number
+  C21:  last_name_raw
+  C24:  first_name_raw
+  C27:  accompanying_guest_raw
+  C30:  arrival_raw
+  C33:  departure_raw
+  C36:  nights_raw
+  C39:  rate_code
+  C45:  room_type_code
+  C48:  nightly_rate_raw
+  C51:  company_raw
+  C54:  reservation_status_raw
+  C66:  specials_raw
+  C81:  last_stay_date_raw
+  C84:  last_room_raw
+  C93:  phone_raw
+  C129: vip_status_raw
+  C135: assigned_room_type_code
+
+# Dining CSV column name aliases (case-insensitive lookup).
+# First matching alias wins for each canonical field.
+dining_column_aliases:
+  visit_date:           [Date, Visit Date, Reservation Date]
+  visit_time:           [Time, Visit Time, Reservation Time]
+  guest_name_raw:       [Guest Name, Name, Guest]
+  first_name:           [First Name, First]
+  last_name:            [Last Name, Last, Surname]
+  phone_raw:            [Phone, Phone Number, Tel, Telephone]
+  party_size:           [Party Size, Covers, Guests, Pax]
+  dining_status:        [Status, Reservation Status, Visit Status]
+  table_raw:            [Table, Table Number, "Table #"]
+  dining_area:          [Area, Section, Dining Area, Room]
+  booking_source:       [Booking Source, Source, Channel]
+  server_name:          [Server, Waiter, Staff, Host]
+  guest_requests_raw:   [Guest Requests, Requests, Special Requests]
+  visit_notes_raw:      [Notes, Visit Notes, Comments]
+  reservation_tags_raw: [Reservation Tags, Tags]
+  guest_tags_raw:       [Guest Tags, Guest Labels]
+  completed_visits:     [Completed Visits, Visit Count, Visits]
+
+# Revenue-style columns stripped from dining — never enters canonical tables.
+dining_removed_revenue_columns:
+  - Experience Title
+  - Experience Price Type
+  - Experience Price
+  - Additional Payments
+  - Additional Payments Subtotal
+  - Experience Gratuity
+  - POS Subtotal
+  - POS Tax
+  - POS Service Charges
+  - POS Gratuity
+  - POS Paid
+  - POS Due
+  - Prepayment Method
+  - Prepayment Status
+  - Prepaid Experience Total Paid
+  - Total Gratuity
+  - Total Tax
+  - Experience Total Sales
+  - Experience Total Sales with Gratuity
+  - Total Revenue
+  - Total Revenue with Gratuity

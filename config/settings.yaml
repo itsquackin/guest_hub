@@ -7,10 +7,18 @@ paths:
   raw_spa: data/raw/spa
   raw_dining: data/raw/dining
   reference: data/reference
-  interim: data/interim
-  processed: data/processed
+  interim_rooms: data/interim/rooms
+  interim_spa: data/interim/spa
+  interim_dining: data/interim/dining
+  canonical: data/processed/canonical
+  hub: data/processed/hub
+  qa: data/processed/qa
+  archive_runs: data/archive/runs
+  archive_snapshots: data/archive/source_snapshots
+  logs: logs
 
 pipeline:
+  # 18-step pipeline order matching the project skeleton specification.
   stages:
     - load_raw_sources
     - load_reference_tables
@@ -21,8 +29,12 @@ pipeline:
     - expand_room_guests
     - enrich_room_lookups
     - write_canonical_outputs
-    - run_qa
-    - match_exact
-    - match_fuzzy
-    - build_hub_outputs
-    - export_package
+    - run_qa_validations
+    - build_guest_phone_dimensions
+    - run_exact_matching
+    - run_fuzzy_matching
+    - apply_support_signals
+    - build_hub_tables
+    - build_fact_room_stay
+    - export_deliverables
+    - write_run_manifest

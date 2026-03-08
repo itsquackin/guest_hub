@@ -19,7 +19,7 @@ def test_match_exact_name_date_finds_match_within_tolerance() -> None:
     match = match_exact_name_date(candidate, stays, tolerance_days=1)
 
     assert match is not None
-    assert match.guest_id == "g1"
+    assert match.stay.guest_id == "g1"
 
 
 def test_match_exact_name_date_returns_none_for_name_mismatch() -> None:

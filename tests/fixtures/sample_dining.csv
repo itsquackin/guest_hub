@@ -1,1 +1,5 @@
-visit_date,visit_time,guest_name
+Date,Time,Guest Name,First Name,Last Name,Phone,Party Size,Status,Table,Area,Booking Source,Server,Guest Requests,Notes,Reservation Tags,Guest Tags,Completed Visits,Experience Title,Experience Price,Total Revenue
+2025-01-11,7:30 PM,Smith John,John,Smith,5551234567,2,Seated,12,Main Dining,OpenTable,Maria,Anniversary dinner setup,,vip;anniversary,loyal,5,Dinner Experience,85.00,170.00
+2025-01-12,8:00 PM,Brown Alice,Alice,Brown,5559876543,1,Seated,5,Bar,Phone,,,,,,2,,,
+2025-01-13,6:30 PM,Garcia Maria,Maria,Garcia,5557654321,4,Seated,22,Private Room,Hotel Concierge,James,Gluten-free options needed,Family celebration,group,,1,Chef's Table,120.00,480.00
+2025-01-14,7:00 PM,Wilson Robert,Robert,Wilson,,2,No Show,8,Main Dining,OpenTable,,,,,repeat,3,,,

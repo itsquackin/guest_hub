@@ -1,3 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <rooms>
-  <!-- TODO: add sample room XML fixture -->
+  <!-- Reservation with two accompanying guests and full field set -->
+  <room>
+    <C9>Smith, John A</C9>
+    <C15>2025-01-05</C15>
+    <C18>RES-001</C18>
+    <C21>Smith</C21>
+    <C24>John</C24>
+    <C27>Jane Smith, Bob Johnson</C27>
+    <C30>2025-01-10</C30>
+    <C33>2025-01-13</C33>
+    <C36>3</C36>
+    <C39>RACK</C39>
+    <C45>DLX</C45>
+    <C48>250.00</C48>
+    <C51>Acme Corp</C51>
+    <C54>Confirmed</C54>
+    <C66>OCA,HNY</C66>
+    <C81>2024-06-15</C81>
+    <C84>204</C84>
+    <C93>5551234567</C93>
+    <C129>VIP1</C129>
+    <C135>DLX-K</C135>
+  </room>
+  <!-- Reservation with no accompanying guests -->
+  <room>
+    <C9>Brown, Alice</C9>
+    <C15>2025-01-06</C15>
+    <C18>RES-002</C18>
+    <C21>Brown</C21>
+    <C24>Alice</C24>
+    <C27></C27>
+    <C30>2025-01-11</C30>
+    <C33>2025-01-14</C33>
+    <C36>3</C36>
+    <C39>AAA</C39>
+    <C45>STD</C45>
+    <C48>180.00</C48>
+    <C51></C51>
+    <C54>Confirmed</C54>
+    <C66>HNY</C66>
+    <C81></C81>
+    <C84></C84>
+    <C93>5559876543</C93>
+    <C129></C129>
+    <C135>STD-Q</C135>
+  </room>
+  <!-- Reservation with a messy accompanying guest field and unknown room type -->
+  <room>
+    <C9>Garcia, Maria</C9>
+    <C15>2025-01-07</C15>
+    <C18>RES-003</C18>
+    <C21>Garcia</C21>
+    <C24>Maria</C24>
+    <C27>Carlos Garcia &amp; Guest</C27>
+    <C30>2025-01-12</C30>
+    <C33>2025-01-15</C33>
+    <C36>3</C36>
+    <C39>GOV</C39>
+    <C45>STE-JR</C45>
+    <C48>320.00</C48>
+    <C51></C51>
+    <C54>Confirmed</C54>
+    <C66>ANN;FLR</C66>
+    <C81>2024-08-20</C81>
+    <C84>512</C84>
+    <C93>5557654321</C93>
+    <C129></C129>
+    <C135>STE-JR</C135>
+  </room>
 </rooms>
