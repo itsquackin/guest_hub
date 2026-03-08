@@ -1,8 +1,17 @@
 """Spa PDF parser.
 
-Extracts appointment rows from spa calendar/itinerary PDFs.
+Extracts guest appointment data from SpaSoft Client Itinerary PDFs.
 Tries pdfplumber first; falls back to a built-in PDF stream reader
 when pdfplumber is unavailable (e.g. missing system cryptography libs).
+
+SpaSoft itinerary format
+------------------------
+Each page contains blocks structured as::
+
+    Guest: [Salutation] LastName FirstName
+    DayOfWeek, Month DD, YYYY
+    SPA  HH:MM AM  Service Name (60 Minutes)
+    SPA  HH:MM AM  Another Service (90 Minutes)
 
 The parser is intentionally permissive — messy or unrecognized rows are
 logged and skipped rather than raising exceptions.
@@ -13,12 +22,8 @@ import logging
 import re
 import zlib
 from dataclasses import dataclass
-from datetime import date
 from pathlib import Path
 
-from src.cleaners.dates import parse_date
-from src.cleaners.nulls import normalize_null
-from src.cleaners.names import split_full_name, build_match_name_key, build_full_name_clean
 from src.utils.id_utils import make_source_row_id
 
 logger = logging.getLogger(__name__)
@@ -49,6 +54,102 @@ class SpaAppointmentRaw:
     therapist_raw: str = ""
 
 
+# ── SpaSoft-specific patterns ─────────────────────────────────────────────────
+
+# "Guest: Mr. Smith John"  →  group(1) = everything after "Guest:"
+_GUEST_LINE_RE = re.compile(r"^Guest:\s*(.+)$", re.IGNORECASE)
+
+# "Friday, January 23, 2026"  or  "Friday, January 3, 2026"
+_DATE_LINE_RE = re.compile(
+    r"^[A-Za-z]+,\s+[A-Za-z]+\s+\d{1,2},?\s*\d{4}"
+)
+
+# "SPA  10:00 AM  Deep Tissue Massage (60 Minutes)"
+_APPT_LINE_RE = re.compile(
+    r"^SPA\s+(\d{1,2}:\d{2}\s+[AP]M)\s+(.+)$", re.IGNORECASE
+)
+
+# Duration inside service name: "(60 Minutes)", "(60 Min)"
+_DURATION_RE = re.compile(r"\((\d+)\s*[Mm]in[^)]*\)")
+
+_SALUTATIONS = ("Ms. ", "Mrs. ", "Mr. ", "Dr. ", "Miss ")
+
+
+def _remove_salutation(name: str) -> str:
+    for sal in _SALUTATIONS:
+        if name.startswith(sal):
+            return name[len(sal):]
+    return name
+
+
+def _parse_spasof_guest_name(raw: str) -> str:
+    """Parse 'Guest: [Salutation] LastName FirstName' → 'FirstName LastName'.
+
+    SpaSoft exports last name first, so we reverse the order so downstream
+    name cleaners (which expect 'First Last') work correctly.
+    """
+    name = _remove_salutation(raw.strip())
+    parts = name.split()
+    if len(parts) == 0:
+        return ""
+    if len(parts) == 1:
+        return parts[0]
+    # SpaSoft: first token = last name, remainder = first name
+    last = parts[0]
+    first = " ".join(parts[1:])
+    return f"{first} {last}"
+
+
+# ── SpaSoft text line parser ──────────────────────────────────────────────────
+
+def _parse_spasof_text(text: str, file_name: str) -> list[SpaAppointmentRaw]:
+    """Parse SpaSoft itinerary text into SpaAppointmentRaw records.
+
+    Walks lines looking for Guest / Date / SPA-appointment triples.
+    """
+    records: list[SpaAppointmentRaw] = []
+    row_idx = 0
+    current_guest = ""
+    current_date = ""
+
+    for line in text.splitlines():
+        line = line.strip()
+        if not line:
+            continue
+
+        guest_m = _GUEST_LINE_RE.match(line)
+        if guest_m:
+            current_guest = _parse_spasof_guest_name(guest_m.group(1))
+            current_date = ""
+            continue
+
+        if current_guest and _DATE_LINE_RE.match(line):
+            current_date = line
+            continue
+
+        if current_guest and current_date:
+            appt_m = _APPT_LINE_RE.match(line)
+            if appt_m:
+                time_raw = appt_m.group(1).strip()
+                service_raw = appt_m.group(2).strip()
+                dur_m = _DURATION_RE.search(service_raw)
+                duration_raw = f"{dur_m.group(1)} min" if dur_m else ""
+                row_idx += 1
+                records.append(
+                    SpaAppointmentRaw(
+                        source_file_name=file_name,
+                        source_row_id=make_source_row_id(file_name, row_idx),
+                        guest_name_raw=current_guest,
+                        service_date_raw=current_date,
+                        service_time_raw=time_raw,
+                        service_name_raw=service_raw,
+                        duration_raw=duration_raw,
+                    )
+                )
+
+    return records
+
+
 # ── Built-in minimal PDF text extractor ──────────────────────────────────────
 
 _PDF_STREAM = re.compile(rb"stream\r?\n(.*?)\r?\nendstream", re.DOTALL)
@@ -69,11 +170,7 @@ def _decode_stream(raw: bytes) -> str:
 
 
 def _extract_text_builtin(pdf_path: Path) -> str:
-    """Extract plain text from a PDF using stdlib only.
-
-    Uses regex-based extraction of PDF text operators (Tj / TJ).
-    Handles FlateDecode-compressed streams.
-    """
+    """Extract plain text from a PDF using stdlib only."""
     try:
         raw_pdf = pdf_path.read_bytes()
     except OSError as exc:
@@ -84,7 +181,6 @@ def _extract_text_builtin(pdf_path: Path) -> str:
     for m in _PDF_STREAM.finditer(raw_pdf):
         stream_bytes = m.group(1)
         text = _decode_stream(stream_bytes)
-        # Extract strings from Tj and TJ operators
         for tj in _TJ_OP.finditer(text):
             lines.append(tj.group(1))
         for arr in _TJ_ARRAY.finditer(text):
@@ -95,154 +191,19 @@ def _extract_text_builtin(pdf_path: Path) -> str:
     return "\n".join(lines)
 
 
-# ── Text-based appointment row parser ─────────────────────────────────────────
-
-# Common date patterns found in spa calendar exports
-_DATE_RE = re.compile(
-    r"\b(\d{1,2}[/\-]\d{1,2}[/\-]\d{2,4}|\w+ \d{1,2},?\s*\d{4}|\d{4}-\d{2}-\d{2})\b"
-)
-_TIME_RE = re.compile(r"\b(\d{1,2}:\d{2}\s*(?:AM|PM|am|pm)?)\b")
-_DURATION_RE = re.compile(r"\b(\d{2,3})\s*(?:min|mins|minutes?)\b", re.IGNORECASE)
-
-
-def _parse_text_lines(
-    lines: list[str],
-    file_name: str,
-) -> list[SpaAppointmentRaw]:
-    """Attempt to extract appointments from free-form text lines.
-
-    Strategy: look for lines containing a date and a guest name candidate.
-    Spa calendar exports vary widely; this covers a common tabular format.
-    """
-    records: list[SpaAppointmentRaw] = []
-    row_idx = 0
-
-    i = 0
-    while i < len(lines):
-        line = lines[i].strip()
-
-        # Skip short, blank, or header-like lines
-        if len(line) < 5 or line.lower() in {"guest", "service", "date", "time", "therapist"}:
-            i += 1
-            continue
-
-        # Try to detect a date on this line or the next
-        date_match = _DATE_RE.search(line)
-        time_match = _TIME_RE.search(line)
-
-        if date_match:
-            date_raw = date_match.group(1)
-            time_raw = time_match.group(1) if time_match else ""
-
-            # Look ahead for guest name and service
-            guest_raw = ""
-            service_raw = ""
-            duration_raw = ""
-
-            # Scan adjacent lines for name/service info
-            for j in range(max(0, i - 2), min(len(lines), i + 4)):
-                nearby = lines[j].strip()
-                if not nearby or nearby == line:
-                    continue
-                dm = _DURATION_RE.search(nearby)
-                if dm:
-                    duration_raw = dm.group(0)
-                # Heuristic: lines without digits are likely names or services
-                if not any(ch.isdigit() for ch in nearby) and len(nearby) > 2:
-                    if not guest_raw:
-                        guest_raw = nearby
-                    elif not service_raw:
-                        service_raw = nearby
-
-            if guest_raw:
-                row_idx += 1
-                records.append(
-                    SpaAppointmentRaw(
-                        source_file_name=file_name,
-                        source_row_id=make_source_row_id(file_name, row_idx),
-                        guest_name_raw=guest_raw,
-                        service_date_raw=date_raw,
-                        service_time_raw=time_raw,
-                        service_name_raw=service_raw,
-                        duration_raw=duration_raw,
-                    )
-                )
-
-        i += 1
-
-    return records
-
+# ── pdfplumber extraction ─────────────────────────────────────────────────────
 
 def _parse_via_pdfplumber(pdf_path: Path) -> list[SpaAppointmentRaw]:
-    """Extract appointment rows using pdfplumber."""
+    """Extract SpaSoft appointment rows using pdfplumber text extraction."""
     file_name = pdf_path.name
-    records: list[SpaAppointmentRaw] = []
-    row_idx = 0
+    all_text_lines: list[str] = []
 
     with pdfplumber.open(pdf_path) as pdf:
-        for page_num, page in enumerate(pdf.pages, start=1):
-            # Try table extraction first
-            tables = page.extract_tables()
-            for table in tables:
-                for raw_row in table:
-                    if not raw_row:
-                        continue
-                    cells = [c or "" for c in raw_row]
-                    if len(cells) < 2:
-                        continue
-                    # Heuristic column order: date/time, guest, service, duration
-                    row_text = " | ".join(cells)
-                    date_m = _DATE_RE.search(row_text)
-                    time_m = _TIME_RE.search(row_text)
-                    dur_m = _DURATION_RE.search(row_text)
+        for page in pdf.pages:
+            text = page.extract_text() or ""
+            all_text_lines.extend(text.splitlines())
 
-                    guest_raw = ""
-                    service_raw = ""
-                    # Look for name-like cells (no digits, > 2 chars)
-                    for cell in cells:
-                        cell = cell.strip()
-                        if not any(ch.isdigit() for ch in cell) and len(cell) > 2:
-                            if not guest_raw:
-                                guest_raw = cell
-                            elif not service_raw:
-                                service_raw = cell
-
-                    if guest_raw and (date_m or time_m):
-                        row_idx += 1
-                        records.append(
-                            SpaAppointmentRaw(
-                                source_file_name=file_name,
-                                source_row_id=make_source_row_id(file_name, row_idx),
-                                guest_name_raw=guest_raw,
-                                service_date_raw=date_m.group(1) if date_m else "",
-                                service_time_raw=time_m.group(1) if time_m else "",
-                                service_name_raw=service_raw,
-                                duration_raw=dur_m.group(0) if dur_m else "",
-                            )
-                        )
-
-            # Fall back to text extraction for pages with no tables
-            if not tables:
-                text = page.extract_text() or ""
-                page_records = _parse_text_lines(
-                    text.splitlines(), file_name
-                )
-                # Re-index
-                for rec in page_records:
-                    row_idx += 1
-                    records.append(
-                        SpaAppointmentRaw(
-                            source_file_name=rec.source_file_name,
-                            source_row_id=make_source_row_id(file_name, row_idx),
-                            guest_name_raw=rec.guest_name_raw,
-                            service_date_raw=rec.service_date_raw,
-                            service_time_raw=rec.service_time_raw,
-                            service_name_raw=rec.service_name_raw,
-                            duration_raw=rec.duration_raw,
-                        )
-                    )
-
-    return records
+    return _parse_spasof_text("\n".join(all_text_lines), file_name)
 
 
 # ── Public API ────────────────────────────────────────────────────────────────
