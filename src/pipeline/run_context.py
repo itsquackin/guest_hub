@@ -34,6 +34,7 @@ class RunContext:
     hub_dir: Path = Path("data/processed/hub")
     qa_dir: Path = Path("data/processed/qa")
     archive_dir: Path = Path("data/archive/runs")
+    interim_dir: Path = Path("data/interim")
 
     # Matching settings
     date_tolerance_days: int = 1
@@ -81,6 +82,7 @@ class RunContext:
             hub_dir=Path(paths.get("hub", "data/processed/hub")),
             qa_dir=Path(paths.get("qa", "data/processed/qa")),
             archive_dir=Path(paths.get("archive_runs", "data/archive/runs")),
+            interim_dir=Path(paths.get("interim_rooms", "data/interim")).parent,
             date_tolerance_days=config.get("date_window_tolerance_days", 1),
             fuzzy_score_cutoff=matching.get("score_cutoff", 0.88),
         )

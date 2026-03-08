@@ -1,0 +1,482 @@
+2026-03-08 18:19:32 [INFO    ] run_pipeline: Guest Hub pipeline starting
+2026-03-08 18:19:32 [INFO    ] src.pipeline.orchestrator: Pipeline run started: run-20260308-181932-053e80
+2026-03-08 18:19:32 [INFO    ] src.pipeline.orchestrator: → Stage: load_raw_sources
+2026-03-08 18:19:32 [WARNING ] src.loaders.room_loader: No room XML files found in: data/raw/rooms
+2026-03-08 18:19:32 [WARNING ] src.loaders.spa_loader: No spa PDF files found in: data/raw/spa
+2026-03-08 18:19:32 [WARNING ] src.loaders.dining_loader: No dining CSV files found in: data/raw/dining
+2026-03-08 18:19:32 [INFO    ] src.pipeline.stages: Source files queued — rooms:0 spa:0 dining:0
+2026-03-08 18:19:32 [INFO    ] src.pipeline.orchestrator: ✓ Stage load_raw_sources completed (0.00s)
+2026-03-08 18:19:32 [INFO    ] src.pipeline.orchestrator: → Stage: load_reference_tables
+2026-03-08 18:19:32 [INFO    ] src.loaders.reference_loader: Loaded 19 room type codes from room_types.tsv
+2026-03-08 18:19:32 [INFO    ] src.loaders.reference_loader: Loaded 16 special request codes from special_requests.tsv
+2026-03-08 18:19:32 [INFO    ] src.pipeline.orchestrator: ✓ Stage load_reference_tables completed (0.00s)
+2026-03-08 18:19:32 [INFO    ] src.pipeline.orchestrator: → Stage: parse_rooms_xml
+2026-03-08 18:19:32 [INFO    ] src.pipeline.stages: Parsed 0 raw room records
+2026-03-08 18:19:32 [INFO    ] src.pipeline.orchestrator: ✓ Stage parse_rooms_xml completed (0.00s)
+2026-03-08 18:19:32 [INFO    ] src.pipeline.orchestrator: → Stage: parse_spa_pdf
+2026-03-08 18:19:32 [INFO    ] src.pipeline.stages: Parsed 0 raw spa records
+2026-03-08 18:19:32 [INFO    ] src.pipeline.orchestrator: ✓ Stage parse_spa_pdf completed (0.00s)
+2026-03-08 18:19:32 [INFO    ] src.pipeline.orchestrator: → Stage: parse_dining_csv
+2026-03-08 18:19:32 [INFO    ] src.pipeline.stages: Parsed 0 raw dining records
+2026-03-08 18:19:32 [INFO    ] src.pipeline.orchestrator: ✓ Stage parse_dining_csv completed (0.00s)
+2026-03-08 18:19:32 [INFO    ] src.pipeline.orchestrator: → Stage: standardize_shared_fields
+2026-03-08 18:19:32 [INFO    ] src.pipeline.stages: Rooms canonical: 0 guest rows from 0 raw records
+2026-03-08 18:19:32 [INFO    ] src.pipeline.orchestrator: ✓ Stage standardize_shared_fields completed (0.00s)
+2026-03-08 18:19:32 [INFO    ] src.pipeline.orchestrator: → Stage: standardize_spa
+2026-03-08 18:19:32 [INFO    ] src.pipeline.stages: Spa canonical: 0 rows
+2026-03-08 18:19:32 [INFO    ] src.pipeline.orchestrator: ✓ Stage standardize_spa completed (0.00s)
+2026-03-08 18:19:32 [INFO    ] src.pipeline.orchestrator: → Stage: standardize_dining
+2026-03-08 18:19:32 [INFO    ] src.pipeline.stages: Dining canonical: 0 rows
+2026-03-08 18:19:32 [INFO    ] src.pipeline.orchestrator: ✓ Stage standardize_dining completed (0.00s)
+2026-03-08 18:19:32 [INFO    ] src.pipeline.orchestrator: → Stage: write_canonical_outputs
+2026-03-08 18:19:32 [INFO    ] src.pipeline.orchestrator: ✓ Stage write_canonical_outputs completed (0.00s)
+2026-03-08 18:19:32 [INFO    ] src.pipeline.orchestrator: → Stage: run_qa_validations
+2026-03-08 18:19:32 [INFO    ] src.qa.name_issues: Found 0 room name issues
+2026-03-08 18:19:32 [INFO    ] src.qa.name_issues: Found 0 spa name issues
+2026-03-08 18:19:32 [INFO    ] src.qa.name_issues: Found 0 dining name issues
+2026-03-08 18:19:32 [INFO    ] src.qa.phone_issues: Found 0 room phone issues
+2026-03-08 18:19:32 [INFO    ] src.qa.phone_issues: Found 0 dining phone issues
+2026-03-08 18:19:32 [INFO    ] src.qa.duplicate_checks: Found 0 duplicate reservation-guest rows
+2026-03-08 18:19:32 [INFO    ] src.qa.validation: Validation complete: 0 name, 0 phone, 0 lookup, 0 duplicate issues
+2026-03-08 18:19:32 [INFO    ] src.pipeline.stages: QA validation complete: 0 total issues
+2026-03-08 18:19:32 [INFO    ] src.pipeline.orchestrator: ✓ Stage run_qa_validations completed (0.00s)
+2026-03-08 18:19:32 [INFO    ] src.pipeline.orchestrator: → Stage: build_guest_phone_dimensions
+2026-03-08 18:19:32 [INFO    ] src.matching.guest_resolver: Resolved 0 unique guest identities from rooms
+2026-03-08 18:19:32 [INFO    ] src.pipeline.stages: Built 0 guest identities, 0 phone records
+2026-03-08 18:19:32 [INFO    ] src.pipeline.orchestrator: ✓ Stage build_guest_phone_dimensions completed (0.00s)
+2026-03-08 18:19:32 [INFO    ] src.pipeline.orchestrator: → Stage: run_exact_matching
+2026-03-08 18:19:32 [INFO    ] src.qa.unmatched: Unmatched spa appointments: 0
+2026-03-08 18:19:32 [INFO    ] src.qa.unmatched: Unmatched dining visits: 0
+2026-03-08 18:19:32 [INFO    ] src.pipeline.stages: Matching complete: 0 links (spa:0 dining:0), unmatched spa:0 dining:0
+2026-03-08 18:19:32 [INFO    ] src.pipeline.orchestrator: ✓ Stage run_exact_matching completed (0.00s)
+2026-03-08 18:19:32 [INFO    ] src.pipeline.orchestrator: → Stage: run_fuzzy_matching
+2026-03-08 18:19:32 [INFO    ] src.pipeline.orchestrator: ✓ Stage run_fuzzy_matching completed (0.00s)
+2026-03-08 18:19:32 [INFO    ] src.pipeline.orchestrator: → Stage: apply_support_signals
+2026-03-08 18:19:32 [INFO    ] src.pipeline.orchestrator: ✓ Stage apply_support_signals completed (0.00s)
+2026-03-08 18:19:32 [INFO    ] src.pipeline.orchestrator: → Stage: build_hub_tables
+2026-03-08 18:19:32 [INFO    ] src.pipeline.orchestrator: ✓ Stage build_hub_tables completed (0.00s)
+2026-03-08 18:19:32 [INFO    ] src.pipeline.orchestrator: → Stage: build_fact_room_stay
+2026-03-08 18:19:32 [INFO    ] src.pipeline.stages: Built 0 fact_room_stay rows and 0 bridge_guest_room_stay rows
+2026-03-08 18:19:32 [INFO    ] src.pipeline.orchestrator: ✓ Stage build_fact_room_stay completed (0.00s)
+2026-03-08 18:19:32 [INFO    ] src.pipeline.orchestrator: → Stage: export_deliverables
+2026-03-08 18:19:32 [INFO    ] src.outputs.export_csv: CSV export complete to: data/processed/canonical / data/processed/hub / data/processed/qa
+2026-03-08 18:19:32 [INFO    ] src.pipeline.orchestrator: ✓ Stage export_deliverables completed (0.00s)
+2026-03-08 18:19:32 [INFO    ] src.pipeline.orchestrator: → Stage: write_run_manifest
+2026-03-08 18:19:32 [INFO    ] src.pipeline.manifest_builder: Run manifest written to: data/processed/qa/run-20260308-181932-053e80_manifest.json
+2026-03-08 18:19:32 [INFO    ] src.pipeline.orchestrator: ✓ Stage write_run_manifest completed (0.00s)
+2026-03-08 18:19:32 [INFO    ] src.pipeline.orchestrator: Pipeline run complete: run-20260308-181932-053e80 (0.03s, 18 stages, 0 errors)
+2026-03-08 18:19:32 [INFO    ] run_pipeline: Run run-20260308-181932-053e80 complete — rooms:0 spa:0 dining:0 guests:0 errors:0
+2026-03-08 18:19:38 [INFO    ] run_pipeline: Guest Hub pipeline starting
+2026-03-08 18:19:38 [INFO    ] src.pipeline.orchestrator: Pipeline run started: run-20260308-181938-3cd594
+2026-03-08 18:19:38 [INFO    ] src.pipeline.orchestrator: → Stage: load_raw_sources
+2026-03-08 18:19:38 [WARNING ] src.loaders.room_loader: No room XML files found in: data/raw/rooms
+2026-03-08 18:19:38 [WARNING ] src.loaders.spa_loader: No spa PDF files found in: data/raw/spa
+2026-03-08 18:19:38 [WARNING ] src.loaders.dining_loader: No dining CSV files found in: data/raw/dining
+2026-03-08 18:19:38 [INFO    ] src.pipeline.stages: Source files queued — rooms:0 spa:0 dining:0
+2026-03-08 18:19:38 [INFO    ] src.pipeline.orchestrator: ✓ Stage load_raw_sources completed (0.00s)
+2026-03-08 18:19:38 [INFO    ] src.pipeline.orchestrator: → Stage: load_reference_tables
+2026-03-08 18:19:38 [INFO    ] src.loaders.reference_loader: Loaded 19 room type codes from room_types.tsv
+2026-03-08 18:19:38 [INFO    ] src.loaders.reference_loader: Loaded 16 special request codes from special_requests.tsv
+2026-03-08 18:19:38 [INFO    ] src.pipeline.orchestrator: ✓ Stage load_reference_tables completed (0.00s)
+2026-03-08 18:19:38 [INFO    ] src.pipeline.orchestrator: → Stage: parse_rooms_xml
+2026-03-08 18:19:38 [INFO    ] src.pipeline.stages: Parsed 0 raw room records
+2026-03-08 18:19:38 [INFO    ] src.pipeline.orchestrator: ✓ Stage parse_rooms_xml completed (0.00s)
+2026-03-08 18:19:38 [INFO    ] src.pipeline.orchestrator: → Stage: parse_spa_pdf
+2026-03-08 18:19:38 [INFO    ] src.pipeline.stages: Parsed 0 raw spa records
+2026-03-08 18:19:38 [INFO    ] src.pipeline.orchestrator: ✓ Stage parse_spa_pdf completed (0.00s)
+2026-03-08 18:19:38 [INFO    ] src.pipeline.orchestrator: → Stage: parse_dining_csv
+2026-03-08 18:19:38 [INFO    ] src.pipeline.stages: Parsed 0 raw dining records
+2026-03-08 18:19:38 [INFO    ] src.pipeline.orchestrator: ✓ Stage parse_dining_csv completed (0.00s)
+2026-03-08 18:19:38 [INFO    ] src.pipeline.orchestrator: → Stage: standardize_shared_fields
+2026-03-08 18:19:38 [INFO    ] src.pipeline.stages: Rooms canonical: 0 guest rows from 0 raw records
+2026-03-08 18:19:38 [INFO    ] src.pipeline.orchestrator: ✓ Stage standardize_shared_fields completed (0.00s)
+2026-03-08 18:19:38 [INFO    ] src.pipeline.orchestrator: → Stage: standardize_spa
+2026-03-08 18:19:38 [INFO    ] src.pipeline.stages: Spa canonical: 0 rows
+2026-03-08 18:19:38 [INFO    ] src.pipeline.orchestrator: ✓ Stage standardize_spa completed (0.00s)
+2026-03-08 18:19:38 [INFO    ] src.pipeline.orchestrator: → Stage: standardize_dining
+2026-03-08 18:19:38 [INFO    ] src.pipeline.stages: Dining canonical: 0 rows
+2026-03-08 18:19:38 [INFO    ] src.pipeline.orchestrator: ✓ Stage standardize_dining completed (0.00s)
+2026-03-08 18:19:38 [INFO    ] src.pipeline.orchestrator: → Stage: write_canonical_outputs
+2026-03-08 18:19:38 [INFO    ] src.pipeline.orchestrator: ✓ Stage write_canonical_outputs completed (0.00s)
+2026-03-08 18:19:38 [INFO    ] src.pipeline.orchestrator: → Stage: run_qa_validations
+2026-03-08 18:19:38 [INFO    ] src.qa.name_issues: Found 0 room name issues
+2026-03-08 18:19:38 [INFO    ] src.qa.name_issues: Found 0 spa name issues
+2026-03-08 18:19:38 [INFO    ] src.qa.name_issues: Found 0 dining name issues
+2026-03-08 18:19:38 [INFO    ] src.qa.phone_issues: Found 0 room phone issues
+2026-03-08 18:19:38 [INFO    ] src.qa.phone_issues: Found 0 dining phone issues
+2026-03-08 18:19:38 [INFO    ] src.qa.duplicate_checks: Found 0 duplicate reservation-guest rows
+2026-03-08 18:19:38 [INFO    ] src.qa.validation: Validation complete: 0 name, 0 phone, 0 lookup, 0 duplicate issues
+2026-03-08 18:19:38 [INFO    ] src.pipeline.stages: QA validation complete: 0 total issues
+2026-03-08 18:19:38 [INFO    ] src.pipeline.orchestrator: ✓ Stage run_qa_validations completed (0.00s)
+2026-03-08 18:19:38 [INFO    ] src.pipeline.orchestrator: → Stage: build_guest_phone_dimensions
+2026-03-08 18:19:38 [INFO    ] src.matching.guest_resolver: Resolved 0 unique guest identities from rooms
+2026-03-08 18:19:38 [INFO    ] src.pipeline.stages: Built 0 guest identities, 0 phone records
+2026-03-08 18:19:38 [INFO    ] src.pipeline.orchestrator: ✓ Stage build_guest_phone_dimensions completed (0.00s)
+2026-03-08 18:19:38 [INFO    ] src.pipeline.orchestrator: → Stage: run_exact_matching
+2026-03-08 18:19:38 [INFO    ] src.qa.unmatched: Unmatched spa appointments: 0
+2026-03-08 18:19:38 [INFO    ] src.qa.unmatched: Unmatched dining visits: 0
+2026-03-08 18:19:38 [INFO    ] src.pipeline.stages: Matching complete: 0 links (spa:0 dining:0), unmatched spa:0 dining:0
+2026-03-08 18:19:38 [INFO    ] src.pipeline.orchestrator: ✓ Stage run_exact_matching completed (0.00s)
+2026-03-08 18:19:38 [INFO    ] src.pipeline.orchestrator: → Stage: run_fuzzy_matching
+2026-03-08 18:19:38 [INFO    ] src.pipeline.orchestrator: ✓ Stage run_fuzzy_matching completed (0.00s)
+2026-03-08 18:19:38 [INFO    ] src.pipeline.orchestrator: → Stage: apply_support_signals
+2026-03-08 18:19:38 [INFO    ] src.pipeline.orchestrator: ✓ Stage apply_support_signals completed (0.00s)
+2026-03-08 18:19:38 [INFO    ] src.pipeline.orchestrator: → Stage: build_hub_tables
+2026-03-08 18:19:38 [INFO    ] src.pipeline.orchestrator: ✓ Stage build_hub_tables completed (0.00s)
+2026-03-08 18:19:38 [INFO    ] src.pipeline.orchestrator: → Stage: build_fact_room_stay
+2026-03-08 18:19:38 [INFO    ] src.pipeline.stages: Built 0 fact_room_stay rows and 0 bridge_guest_room_stay rows
+2026-03-08 18:19:38 [INFO    ] src.pipeline.orchestrator: ✓ Stage build_fact_room_stay completed (0.00s)
+2026-03-08 18:19:38 [INFO    ] src.pipeline.orchestrator: → Stage: export_deliverables
+2026-03-08 18:19:38 [INFO    ] src.outputs.export_csv: CSV export complete to: data/processed/canonical / data/processed/hub / data/processed/qa
+2026-03-08 18:19:38 [INFO    ] src.pipeline.orchestrator: ✓ Stage export_deliverables completed (0.00s)
+2026-03-08 18:19:38 [INFO    ] src.pipeline.orchestrator: → Stage: write_run_manifest
+2026-03-08 18:19:38 [INFO    ] src.pipeline.manifest_builder: Run manifest written to: data/processed/qa/run-20260308-181938-3cd594_manifest.json
+2026-03-08 18:19:38 [INFO    ] src.pipeline.orchestrator: ✓ Stage write_run_manifest completed (0.00s)
+2026-03-08 18:19:38 [INFO    ] src.pipeline.orchestrator: Pipeline run complete: run-20260308-181938-3cd594 (0.03s, 18 stages, 0 errors)
+2026-03-08 18:19:38 [INFO    ] run_pipeline: Run run-20260308-181938-3cd594 complete — rooms:0 spa:0 dining:0 guests:0 errors:0
+2026-03-08 18:20:12 [INFO    ] run_pipeline: Guest Hub pipeline starting
+2026-03-08 18:20:12 [INFO    ] src.pipeline.orchestrator: Pipeline run started: run-20260308-182012-74b1ac
+2026-03-08 18:20:12 [INFO    ] src.pipeline.orchestrator: → Stage: load_raw_sources
+2026-03-08 18:20:12 [INFO    ] src.loaders.room_loader: Found 1 room file(s) in: data/raw/rooms
+2026-03-08 18:20:12 [WARNING ] src.loaders.spa_loader: No spa PDF files found in: data/raw/spa
+2026-03-08 18:20:12 [INFO    ] src.loaders.dining_loader: Found 1 dining file(s) in: data/raw/dining
+2026-03-08 18:20:12 [INFO    ] src.pipeline.stages: Source files queued — rooms:1 spa:0 dining:1
+2026-03-08 18:20:12 [INFO    ] src.pipeline.orchestrator: ✓ Stage load_raw_sources completed (0.00s)
+2026-03-08 18:20:12 [INFO    ] src.pipeline.orchestrator: → Stage: load_reference_tables
+2026-03-08 18:20:12 [INFO    ] src.loaders.reference_loader: Loaded 19 room type codes from room_types.tsv
+2026-03-08 18:20:12 [INFO    ] src.loaders.reference_loader: Loaded 16 special request codes from special_requests.tsv
+2026-03-08 18:20:12 [INFO    ] src.pipeline.orchestrator: ✓ Stage load_reference_tables completed (0.00s)
+2026-03-08 18:20:12 [INFO    ] src.pipeline.orchestrator: → Stage: parse_rooms_xml
+2026-03-08 18:20:12 [INFO    ] src.parsers.room_parser: Parsed 3/3 room records from sample_room.xml
+2026-03-08 18:20:12 [INFO    ] src.pipeline.stages: Parsed 3 raw room records
+2026-03-08 18:20:12 [INFO    ] src.pipeline.orchestrator: ✓ Stage parse_rooms_xml completed (0.00s)
+2026-03-08 18:20:12 [INFO    ] src.pipeline.orchestrator: → Stage: parse_spa_pdf
+2026-03-08 18:20:12 [INFO    ] src.pipeline.stages: Parsed 0 raw spa records
+2026-03-08 18:20:12 [INFO    ] src.pipeline.orchestrator: ✓ Stage parse_spa_pdf completed (0.00s)
+2026-03-08 18:20:12 [INFO    ] src.pipeline.orchestrator: → Stage: parse_dining_csv
+2026-03-08 18:20:12 [INFO    ] src.parsers.dining_parser: Parsing dining CSV: sample_dining.csv
+2026-03-08 18:20:12 [INFO    ] src.parsers.dining_parser: Dropping 3 revenue column(s) from sample_dining.csv: ['Experience Price', 'Experience Title', 'Total Revenue']
+2026-03-08 18:20:12 [INFO    ] src.parsers.dining_parser: Parsed 4 dining records from sample_dining.csv
+2026-03-08 18:20:12 [INFO    ] src.pipeline.stages: Parsed 4 raw dining records
+2026-03-08 18:20:12 [INFO    ] src.pipeline.orchestrator: ✓ Stage parse_dining_csv completed (0.00s)
+2026-03-08 18:20:12 [INFO    ] src.pipeline.orchestrator: → Stage: standardize_shared_fields
+2026-03-08 18:20:12 [WARNING ] src.transforms.rooms_expand_guests: Accompanying guest name issue in sample_room.xml (conf=RES-003, seq=3): partial_name:'Guest'
+2026-03-08 18:20:12 [INFO    ] src.pipeline.stages: Rooms canonical: 7 guest rows from 3 raw records
+2026-03-08 18:20:12 [INFO    ] src.pipeline.orchestrator: ✓ Stage standardize_shared_fields completed (0.00s)
+2026-03-08 18:20:12 [INFO    ] src.pipeline.orchestrator: → Stage: standardize_spa
+2026-03-08 18:20:12 [INFO    ] src.pipeline.stages: Spa canonical: 0 rows
+2026-03-08 18:20:12 [INFO    ] src.pipeline.orchestrator: ✓ Stage standardize_spa completed (0.00s)
+2026-03-08 18:20:12 [INFO    ] src.pipeline.orchestrator: → Stage: standardize_dining
+2026-03-08 18:20:12 [INFO    ] src.pipeline.stages: Dining canonical: 4 rows
+2026-03-08 18:20:12 [INFO    ] src.pipeline.orchestrator: ✓ Stage standardize_dining completed (0.00s)
+2026-03-08 18:20:12 [INFO    ] src.pipeline.orchestrator: → Stage: write_canonical_outputs
+2026-03-08 18:20:12 [INFO    ] src.pipeline.orchestrator: ✓ Stage write_canonical_outputs completed (0.00s)
+2026-03-08 18:20:12 [INFO    ] src.pipeline.orchestrator: → Stage: run_qa_validations
+2026-03-08 18:20:12 [INFO    ] src.qa.name_issues: Found 1 room name issues
+2026-03-08 18:20:12 [INFO    ] src.qa.name_issues: Found 0 spa name issues
+2026-03-08 18:20:12 [INFO    ] src.qa.name_issues: Found 0 dining name issues
+2026-03-08 18:20:12 [INFO    ] src.qa.phone_issues: Found 4 room phone issues
+2026-03-08 18:20:12 [INFO    ] src.qa.phone_issues: Found 1 dining phone issues
+2026-03-08 18:20:12 [INFO    ] src.qa.duplicate_checks: Found 0 duplicate reservation-guest rows
+2026-03-08 18:20:12 [INFO    ] src.qa.validation: Validation complete: 1 name, 5 phone, 0 lookup, 0 duplicate issues
+2026-03-08 18:20:12 [INFO    ] src.pipeline.stages: QA validation complete: 6 total issues
+2026-03-08 18:20:12 [INFO    ] src.pipeline.orchestrator: ✓ Stage run_qa_validations completed (0.00s)
+2026-03-08 18:20:12 [INFO    ] src.pipeline.orchestrator: → Stage: build_guest_phone_dimensions
+2026-03-08 18:20:12 [INFO    ] src.matching.guest_resolver: Resolved 7 unique guest identities from rooms
+2026-03-08 18:20:12 [INFO    ] src.pipeline.stages: Built 7 guest identities, 3 phone records
+2026-03-08 18:20:12 [INFO    ] src.pipeline.orchestrator: ✓ Stage build_guest_phone_dimensions completed (0.00s)
+2026-03-08 18:20:12 [INFO    ] src.pipeline.orchestrator: → Stage: run_exact_matching
+2026-03-08 18:20:12 [INFO    ] src.qa.unmatched: Unmatched spa appointments: 0
+2026-03-08 18:20:12 [INFO    ] src.qa.unmatched: Unmatched dining visits: 1
+2026-03-08 18:20:12 [INFO    ] src.pipeline.stages: Matching complete: 3 links (spa:0 dining:3), unmatched spa:0 dining:1
+2026-03-08 18:20:12 [INFO    ] src.pipeline.orchestrator: ✓ Stage run_exact_matching completed (0.00s)
+2026-03-08 18:20:12 [INFO    ] src.pipeline.orchestrator: → Stage: run_fuzzy_matching
+2026-03-08 18:20:12 [INFO    ] src.pipeline.orchestrator: ✓ Stage run_fuzzy_matching completed (0.00s)
+2026-03-08 18:20:12 [INFO    ] src.pipeline.orchestrator: → Stage: apply_support_signals
+2026-03-08 18:20:12 [INFO    ] src.pipeline.orchestrator: ✓ Stage apply_support_signals completed (0.00s)
+2026-03-08 18:20:12 [INFO    ] src.pipeline.orchestrator: → Stage: build_hub_tables
+2026-03-08 18:20:12 [INFO    ] src.pipeline.orchestrator: ✓ Stage build_hub_tables completed (0.00s)
+2026-03-08 18:20:12 [INFO    ] src.pipeline.orchestrator: → Stage: build_fact_room_stay
+2026-03-08 18:20:12 [INFO    ] src.pipeline.stages: Built 3 fact_room_stay rows and 7 bridge_guest_room_stay rows
+2026-03-08 18:20:12 [INFO    ] src.pipeline.orchestrator: ✓ Stage build_fact_room_stay completed (0.00s)
+2026-03-08 18:20:12 [INFO    ] src.pipeline.orchestrator: → Stage: export_deliverables
+2026-03-08 18:20:12 [INFO    ] src.outputs.export_csv: Wrote 7 rows to rooms_canonical.csv
+2026-03-08 18:20:12 [INFO    ] src.outputs.export_csv: Wrote 4 rows to dining_canonical.csv
+2026-03-08 18:20:12 [INFO    ] src.outputs.export_csv: Wrote 7 rows to dim_guest.csv
+2026-03-08 18:20:12 [INFO    ] src.outputs.export_csv: Wrote 3 rows to dim_phone.csv
+2026-03-08 18:20:12 [INFO    ] src.outputs.export_csv: Wrote 3 rows to fact_room_stay.csv
+2026-03-08 18:20:12 [INFO    ] src.outputs.export_csv: Wrote 3 rows to bridge_guest_activity.csv
+2026-03-08 18:20:12 [INFO    ] src.outputs.export_csv: Wrote 7 rows to bridge_guest_room_stay.csv
+2026-03-08 18:20:12 [INFO    ] src.outputs.export_csv: Wrote 1 rows to qa_name_issues.csv
+2026-03-08 18:20:12 [INFO    ] src.outputs.export_csv: Wrote 5 rows to qa_phone_issues.csv
+2026-03-08 18:20:12 [INFO    ] src.outputs.export_csv: Wrote 1 rows to qa_unmatched_dining.csv
+2026-03-08 18:20:12 [INFO    ] src.outputs.export_csv: CSV export complete to: data/processed/canonical / data/processed/hub / data/processed/qa
+2026-03-08 18:20:12 [INFO    ] src.pipeline.orchestrator: ✓ Stage export_deliverables completed (0.01s)
+2026-03-08 18:20:12 [INFO    ] src.pipeline.orchestrator: → Stage: write_run_manifest
+2026-03-08 18:20:12 [INFO    ] src.pipeline.manifest_builder: Run manifest written to: data/processed/qa/run-20260308-182012-74b1ac_manifest.json
+2026-03-08 18:20:12 [INFO    ] src.pipeline.orchestrator: ✓ Stage write_run_manifest completed (0.00s)
+2026-03-08 18:20:12 [INFO    ] src.pipeline.orchestrator: Pipeline run complete: run-20260308-182012-74b1ac (0.04s, 18 stages, 0 errors)
+2026-03-08 18:20:12 [INFO    ] run_pipeline: Run run-20260308-182012-74b1ac complete — rooms:7 spa:0 dining:4 guests:7 errors:0
+2026-03-08 18:25:26 [INFO    ] run_pipeline: Guest Hub pipeline starting
+2026-03-08 18:25:27 [INFO    ] src.pipeline.orchestrator: Pipeline run started: run-20260308-182526-04dbac
+2026-03-08 18:25:27 [INFO    ] src.pipeline.orchestrator: → Stage: load_raw_sources
+2026-03-08 18:25:27 [INFO    ] src.loaders.room_loader: Found 1 room file(s) in: data/raw/rooms
+2026-03-08 18:25:27 [WARNING ] src.loaders.spa_loader: No spa PDF files found in: data/raw/spa
+2026-03-08 18:25:27 [INFO    ] src.loaders.dining_loader: Found 1 dining file(s) in: data/raw/dining
+2026-03-08 18:25:27 [INFO    ] src.pipeline.stages: Source files queued — rooms:1 spa:0 dining:1
+2026-03-08 18:25:27 [INFO    ] src.pipeline.orchestrator: ✓ Stage load_raw_sources completed (0.00s)
+2026-03-08 18:25:27 [INFO    ] src.pipeline.orchestrator: → Stage: load_reference_tables
+2026-03-08 18:25:27 [INFO    ] src.loaders.reference_loader: Loaded 19 room type codes from room_types.tsv
+2026-03-08 18:25:27 [INFO    ] src.loaders.reference_loader: Loaded 16 special request codes from special_requests.tsv
+2026-03-08 18:25:27 [INFO    ] src.pipeline.orchestrator: ✓ Stage load_reference_tables completed (0.00s)
+2026-03-08 18:25:27 [INFO    ] src.pipeline.orchestrator: → Stage: parse_rooms_xml
+2026-03-08 18:25:27 [INFO    ] src.parsers.room_parser: Parsed 3/3 room records from sample_room.xml
+2026-03-08 18:25:27 [INFO    ] src.pipeline.stages: Parsed 3 raw room records
+2026-03-08 18:25:27 [INFO    ] src.pipeline.orchestrator: ✓ Stage parse_rooms_xml completed (0.00s)
+2026-03-08 18:25:27 [INFO    ] src.pipeline.orchestrator: → Stage: parse_spa_pdf
+2026-03-08 18:25:27 [INFO    ] src.pipeline.stages: Parsed 0 raw spa records
+2026-03-08 18:25:27 [INFO    ] src.pipeline.orchestrator: ✓ Stage parse_spa_pdf completed (0.00s)
+2026-03-08 18:25:27 [INFO    ] src.pipeline.orchestrator: → Stage: parse_dining_csv
+2026-03-08 18:25:27 [INFO    ] src.parsers.dining_parser: Parsing dining CSV: sample_dining.csv
+2026-03-08 18:25:27 [INFO    ] src.parsers.dining_parser: Dropping 3 revenue column(s) from sample_dining.csv: ['Experience Price', 'Experience Title', 'Total Revenue']
+2026-03-08 18:25:27 [INFO    ] src.parsers.dining_parser: Parsed 4 dining records from sample_dining.csv
+2026-03-08 18:25:27 [INFO    ] src.pipeline.stages: Parsed 4 raw dining records
+2026-03-08 18:25:27 [INFO    ] src.pipeline.orchestrator: ✓ Stage parse_dining_csv completed (0.00s)
+2026-03-08 18:25:27 [INFO    ] src.pipeline.orchestrator: → Stage: standardize_shared_fields
+2026-03-08 18:25:27 [WARNING ] src.transforms.rooms_expand_guests: Accompanying guest name issue in sample_room.xml (conf=RES-003, seq=3): partial_name:'Guest'
+2026-03-08 18:25:27 [INFO    ] src.pipeline.stages: Rooms canonical: 7 guest rows from 3 raw records
+2026-03-08 18:25:27 [INFO    ] src.pipeline.orchestrator: ✓ Stage standardize_shared_fields completed (0.00s)
+2026-03-08 18:25:27 [INFO    ] src.pipeline.orchestrator: → Stage: standardize_spa
+2026-03-08 18:25:27 [INFO    ] src.pipeline.stages: Spa canonical: 0 rows
+2026-03-08 18:25:27 [INFO    ] src.pipeline.orchestrator: ✓ Stage standardize_spa completed (0.00s)
+2026-03-08 18:25:27 [INFO    ] src.pipeline.orchestrator: → Stage: standardize_dining
+2026-03-08 18:25:27 [INFO    ] src.pipeline.stages: Dining canonical: 4 rows
+2026-03-08 18:25:27 [INFO    ] src.pipeline.orchestrator: ✓ Stage standardize_dining completed (0.00s)
+2026-03-08 18:25:27 [INFO    ] src.pipeline.orchestrator: → Stage: write_canonical_outputs
+2026-03-08 18:25:27 [INFO    ] src.outputs.export_csv: Wrote 7 rows to rooms_canonical_interim.csv
+2026-03-08 18:25:27 [INFO    ] src.outputs.export_csv: Wrote 4 rows to dining_canonical_interim.csv
+2026-03-08 18:25:27 [INFO    ] src.pipeline.orchestrator: Interim canonical outputs written: rooms:7 spa:0 dining:4
+2026-03-08 18:25:27 [INFO    ] src.pipeline.orchestrator: ✓ Stage write_canonical_outputs completed (0.00s)
+2026-03-08 18:25:27 [INFO    ] src.pipeline.orchestrator: → Stage: run_qa_validations
+2026-03-08 18:25:27 [INFO    ] src.qa.name_issues: Found 1 room name issues
+2026-03-08 18:25:27 [INFO    ] src.qa.name_issues: Found 0 spa name issues
+2026-03-08 18:25:27 [INFO    ] src.qa.name_issues: Found 0 dining name issues
+2026-03-08 18:25:27 [INFO    ] src.qa.phone_issues: Found 4 room phone issues
+2026-03-08 18:25:27 [INFO    ] src.qa.phone_issues: Found 1 dining phone issues
+2026-03-08 18:25:27 [INFO    ] src.qa.duplicate_checks: Found 0 duplicate reservation-guest rows
+2026-03-08 18:25:27 [INFO    ] src.qa.validation: Validation complete: 1 name, 5 phone, 0 lookup, 0 duplicate issues
+2026-03-08 18:25:27 [INFO    ] src.pipeline.stages: QA validation complete: 6 total issues
+2026-03-08 18:25:27 [INFO    ] src.pipeline.orchestrator: ✓ Stage run_qa_validations completed (0.00s)
+2026-03-08 18:25:27 [INFO    ] src.pipeline.orchestrator: → Stage: build_guest_phone_dimensions
+2026-03-08 18:25:27 [INFO    ] src.matching.guest_resolver: Resolved 7 unique guest identities from rooms
+2026-03-08 18:25:27 [INFO    ] src.pipeline.stages: Built 7 guest identities, 3 phone records
+2026-03-08 18:25:27 [INFO    ] src.pipeline.orchestrator: ✓ Stage build_guest_phone_dimensions completed (0.00s)
+2026-03-08 18:25:27 [INFO    ] src.pipeline.orchestrator: → Stage: run_exact_matching
+2026-03-08 18:25:27 [INFO    ] src.qa.unmatched: Unmatched spa appointments: 0
+2026-03-08 18:25:27 [INFO    ] src.qa.unmatched: Unmatched dining visits: 1
+2026-03-08 18:25:27 [INFO    ] src.pipeline.stages: Matching complete: 3 links (spa:0 dining:3), unmatched spa:0 dining:1
+2026-03-08 18:25:27 [INFO    ] src.pipeline.orchestrator: ✓ Stage run_exact_matching completed (0.00s)
+2026-03-08 18:25:27 [INFO    ] src.pipeline.orchestrator: → Stage: run_fuzzy_matching
+2026-03-08 18:25:27 [INFO    ] src.pipeline.orchestrator: ✓ Stage run_fuzzy_matching completed (0.00s)
+2026-03-08 18:25:27 [INFO    ] src.pipeline.orchestrator: → Stage: apply_support_signals
+2026-03-08 18:25:27 [INFO    ] src.pipeline.orchestrator: ✓ Stage apply_support_signals completed (0.00s)
+2026-03-08 18:25:27 [INFO    ] src.pipeline.orchestrator: → Stage: build_hub_tables
+2026-03-08 18:25:27 [ERROR   ] src.pipeline.orchestrator: ✗ Stage build_hub_tables failed after 0.00s — CANDIDATE
+2026-03-08 18:25:27 [INFO    ] src.pipeline.orchestrator: → Stage: build_fact_room_stay
+2026-03-08 18:25:27 [INFO    ] src.pipeline.stages: Built 3 fact_room_stay rows and 7 bridge_guest_room_stay rows
+2026-03-08 18:25:27 [INFO    ] src.pipeline.orchestrator: ✓ Stage build_fact_room_stay completed (0.00s)
+2026-03-08 18:25:27 [INFO    ] src.pipeline.orchestrator: → Stage: export_deliverables
+2026-03-08 18:25:27 [INFO    ] src.outputs.export_csv: Wrote 7 rows to rooms_canonical.csv
+2026-03-08 18:25:27 [INFO    ] src.outputs.export_csv: Wrote 4 rows to dining_canonical.csv
+2026-03-08 18:25:27 [INFO    ] src.outputs.export_csv: Wrote 7 rows to dim_guest.csv
+2026-03-08 18:25:27 [INFO    ] src.outputs.export_csv: Wrote 3 rows to dim_phone.csv
+2026-03-08 18:25:27 [INFO    ] src.outputs.export_csv: Wrote 3 rows to fact_room_stay.csv
+2026-03-08 18:25:27 [INFO    ] src.outputs.export_csv: Wrote 3 rows to bridge_guest_activity.csv
+2026-03-08 18:25:27 [INFO    ] src.outputs.export_csv: Wrote 7 rows to bridge_guest_room_stay.csv
+2026-03-08 18:25:27 [INFO    ] src.outputs.export_csv: Wrote 1 rows to qa_name_issues.csv
+2026-03-08 18:25:27 [INFO    ] src.outputs.export_csv: Wrote 5 rows to qa_phone_issues.csv
+2026-03-08 18:25:27 [INFO    ] src.outputs.export_csv: Wrote 1 rows to qa_unmatched_dining.csv
+2026-03-08 18:25:27 [INFO    ] src.outputs.export_csv: CSV export complete to: data/processed/canonical / data/processed/hub / data/processed/qa
+2026-03-08 18:25:27 [INFO    ] src.pipeline.orchestrator: ✓ Stage export_deliverables completed (0.01s)
+2026-03-08 18:25:27 [INFO    ] src.pipeline.orchestrator: → Stage: write_run_manifest
+2026-03-08 18:25:27 [INFO    ] src.pipeline.manifest_builder: Run manifest written to: data/processed/qa/run-20260308-182526-04dbac_manifest.json
+2026-03-08 18:25:27 [INFO    ] src.pipeline.orchestrator: ✓ Stage write_run_manifest completed (0.00s)
+2026-03-08 18:25:27 [INFO    ] src.pipeline.orchestrator: Pipeline run complete: run-20260308-182526-04dbac (0.06s, 18 stages, 1 errors)
+2026-03-08 18:25:27 [INFO    ] run_pipeline: Run run-20260308-182526-04dbac complete — rooms:7 spa:0 dining:4 guests:7 errors:1
+2026-03-08 18:26:07 [INFO    ] run_pipeline: Guest Hub pipeline starting
+2026-03-08 18:26:08 [INFO    ] src.pipeline.orchestrator: Pipeline run started: run-20260308-182607-c7029e
+2026-03-08 18:26:08 [INFO    ] src.pipeline.orchestrator: → Stage: load_raw_sources
+2026-03-08 18:26:08 [INFO    ] src.loaders.room_loader: Found 1 room file(s) in: data/raw/rooms
+2026-03-08 18:26:08 [WARNING ] src.loaders.spa_loader: No spa PDF files found in: data/raw/spa
+2026-03-08 18:26:08 [INFO    ] src.loaders.dining_loader: Found 1 dining file(s) in: data/raw/dining
+2026-03-08 18:26:08 [INFO    ] src.pipeline.stages: Source files queued — rooms:1 spa:0 dining:1
+2026-03-08 18:26:08 [INFO    ] src.pipeline.orchestrator: ✓ Stage load_raw_sources completed (0.00s)
+2026-03-08 18:26:08 [INFO    ] src.pipeline.orchestrator: → Stage: load_reference_tables
+2026-03-08 18:26:08 [INFO    ] src.loaders.reference_loader: Loaded 19 room type codes from room_types.tsv
+2026-03-08 18:26:08 [INFO    ] src.loaders.reference_loader: Loaded 16 special request codes from special_requests.tsv
+2026-03-08 18:26:08 [INFO    ] src.pipeline.orchestrator: ✓ Stage load_reference_tables completed (0.00s)
+2026-03-08 18:26:08 [INFO    ] src.pipeline.orchestrator: → Stage: parse_rooms_xml
+2026-03-08 18:26:08 [INFO    ] src.parsers.room_parser: Parsed 3/3 room records from sample_room.xml
+2026-03-08 18:26:08 [INFO    ] src.pipeline.stages: Parsed 3 raw room records
+2026-03-08 18:26:08 [INFO    ] src.pipeline.orchestrator: ✓ Stage parse_rooms_xml completed (0.00s)
+2026-03-08 18:26:08 [INFO    ] src.pipeline.orchestrator: → Stage: parse_spa_pdf
+2026-03-08 18:26:08 [INFO    ] src.pipeline.stages: Parsed 0 raw spa records
+2026-03-08 18:26:08 [INFO    ] src.pipeline.orchestrator: ✓ Stage parse_spa_pdf completed (0.00s)
+2026-03-08 18:26:08 [INFO    ] src.pipeline.orchestrator: → Stage: parse_dining_csv
+2026-03-08 18:26:08 [INFO    ] src.parsers.dining_parser: Parsing dining CSV: sample_dining.csv
+2026-03-08 18:26:08 [INFO    ] src.parsers.dining_parser: Dropping 3 revenue column(s) from sample_dining.csv: ['Experience Price', 'Experience Title', 'Total Revenue']
+2026-03-08 18:26:08 [INFO    ] src.parsers.dining_parser: Parsed 4 dining records from sample_dining.csv
+2026-03-08 18:26:08 [INFO    ] src.pipeline.stages: Parsed 4 raw dining records
+2026-03-08 18:26:08 [INFO    ] src.pipeline.orchestrator: ✓ Stage parse_dining_csv completed (0.00s)
+2026-03-08 18:26:08 [INFO    ] src.pipeline.orchestrator: → Stage: standardize_shared_fields
+2026-03-08 18:26:08 [WARNING ] src.transforms.rooms_expand_guests: Accompanying guest name issue in sample_room.xml (conf=RES-003, seq=3): partial_name:'Guest'
+2026-03-08 18:26:08 [INFO    ] src.pipeline.stages: Rooms canonical: 7 guest rows from 3 raw records
+2026-03-08 18:26:08 [INFO    ] src.pipeline.orchestrator: ✓ Stage standardize_shared_fields completed (0.00s)
+2026-03-08 18:26:08 [INFO    ] src.pipeline.orchestrator: → Stage: standardize_spa
+2026-03-08 18:26:08 [INFO    ] src.pipeline.stages: Spa canonical: 0 rows
+2026-03-08 18:26:08 [INFO    ] src.pipeline.orchestrator: ✓ Stage standardize_spa completed (0.00s)
+2026-03-08 18:26:08 [INFO    ] src.pipeline.orchestrator: → Stage: standardize_dining
+2026-03-08 18:26:08 [INFO    ] src.pipeline.stages: Dining canonical: 4 rows
+2026-03-08 18:26:08 [INFO    ] src.pipeline.orchestrator: ✓ Stage standardize_dining completed (0.00s)
+2026-03-08 18:26:08 [INFO    ] src.pipeline.orchestrator: → Stage: write_canonical_outputs
+2026-03-08 18:26:08 [INFO    ] src.outputs.export_csv: Wrote 7 rows to rooms_canonical_interim.csv
+2026-03-08 18:26:08 [INFO    ] src.outputs.export_csv: Wrote 4 rows to dining_canonical_interim.csv
+2026-03-08 18:26:08 [INFO    ] src.pipeline.orchestrator: Interim canonical outputs written: rooms:7 spa:0 dining:4
+2026-03-08 18:26:08 [INFO    ] src.pipeline.orchestrator: ✓ Stage write_canonical_outputs completed (0.00s)
+2026-03-08 18:26:08 [INFO    ] src.pipeline.orchestrator: → Stage: run_qa_validations
+2026-03-08 18:26:08 [INFO    ] src.qa.name_issues: Found 1 room name issues
+2026-03-08 18:26:08 [INFO    ] src.qa.name_issues: Found 0 spa name issues
+2026-03-08 18:26:08 [INFO    ] src.qa.name_issues: Found 0 dining name issues
+2026-03-08 18:26:08 [INFO    ] src.qa.phone_issues: Found 4 room phone issues
+2026-03-08 18:26:08 [INFO    ] src.qa.phone_issues: Found 1 dining phone issues
+2026-03-08 18:26:08 [INFO    ] src.qa.duplicate_checks: Found 0 duplicate reservation-guest rows
+2026-03-08 18:26:08 [INFO    ] src.qa.validation: Validation complete: 1 name, 5 phone, 0 lookup, 0 duplicate issues
+2026-03-08 18:26:08 [INFO    ] src.pipeline.stages: QA validation complete: 6 total issues
+2026-03-08 18:26:08 [INFO    ] src.pipeline.orchestrator: ✓ Stage run_qa_validations completed (0.00s)
+2026-03-08 18:26:08 [INFO    ] src.pipeline.orchestrator: → Stage: build_guest_phone_dimensions
+2026-03-08 18:26:08 [INFO    ] src.matching.guest_resolver: Resolved 7 unique guest identities from rooms
+2026-03-08 18:26:08 [INFO    ] src.pipeline.stages: Built 7 guest identities, 3 phone records
+2026-03-08 18:26:08 [INFO    ] src.pipeline.orchestrator: ✓ Stage build_guest_phone_dimensions completed (0.00s)
+2026-03-08 18:26:08 [INFO    ] src.pipeline.orchestrator: → Stage: run_exact_matching
+2026-03-08 18:26:08 [INFO    ] src.qa.unmatched: Unmatched spa appointments: 0
+2026-03-08 18:26:08 [INFO    ] src.qa.unmatched: Unmatched dining visits: 1
+2026-03-08 18:26:08 [INFO    ] src.pipeline.stages: Matching complete: 3 links (spa:0 dining:3), unmatched spa:0 dining:1
+2026-03-08 18:26:08 [INFO    ] src.pipeline.orchestrator: ✓ Stage run_exact_matching completed (0.00s)
+2026-03-08 18:26:08 [INFO    ] src.pipeline.orchestrator: → Stage: run_fuzzy_matching
+2026-03-08 18:26:08 [INFO    ] src.pipeline.orchestrator: ✓ Stage run_fuzzy_matching completed (0.00s)
+2026-03-08 18:26:08 [INFO    ] src.pipeline.orchestrator: → Stage: apply_support_signals
+2026-03-08 18:26:08 [INFO    ] src.pipeline.orchestrator: ✓ Stage apply_support_signals completed (0.00s)
+2026-03-08 18:26:08 [INFO    ] src.pipeline.orchestrator: → Stage: build_hub_tables
+2026-03-08 18:26:08 [INFO    ] src.pipeline.orchestrator: Hub tables finalised: 7 guests, 3 phones, 3 activity bridges
+2026-03-08 18:26:08 [INFO    ] src.pipeline.orchestrator: ✓ Stage build_hub_tables completed (0.00s)
+2026-03-08 18:26:08 [INFO    ] src.pipeline.orchestrator: → Stage: build_fact_room_stay
+2026-03-08 18:26:08 [INFO    ] src.pipeline.stages: Built 3 fact_room_stay rows and 7 bridge_guest_room_stay rows
+2026-03-08 18:26:08 [INFO    ] src.pipeline.orchestrator: ✓ Stage build_fact_room_stay completed (0.00s)
+2026-03-08 18:26:08 [INFO    ] src.pipeline.orchestrator: → Stage: export_deliverables
+2026-03-08 18:26:08 [INFO    ] src.outputs.export_csv: Wrote 7 rows to rooms_canonical.csv
+2026-03-08 18:26:08 [INFO    ] src.outputs.export_csv: Wrote 4 rows to dining_canonical.csv
+2026-03-08 18:26:08 [INFO    ] src.outputs.export_csv: Wrote 7 rows to dim_guest.csv
+2026-03-08 18:26:08 [INFO    ] src.outputs.export_csv: Wrote 3 rows to dim_phone.csv
+2026-03-08 18:26:08 [INFO    ] src.outputs.export_csv: Wrote 3 rows to fact_room_stay.csv
+2026-03-08 18:26:08 [INFO    ] src.outputs.export_csv: Wrote 3 rows to bridge_guest_activity.csv
+2026-03-08 18:26:08 [INFO    ] src.outputs.export_csv: Wrote 7 rows to bridge_guest_room_stay.csv
+2026-03-08 18:26:08 [INFO    ] src.outputs.export_csv: Wrote 1 rows to qa_name_issues.csv
+2026-03-08 18:26:08 [INFO    ] src.outputs.export_csv: Wrote 5 rows to qa_phone_issues.csv
+2026-03-08 18:26:08 [INFO    ] src.outputs.export_csv: Wrote 1 rows to qa_unmatched_dining.csv
+2026-03-08 18:26:08 [INFO    ] src.outputs.export_csv: CSV export complete to: data/processed/canonical / data/processed/hub / data/processed/qa
+2026-03-08 18:26:08 [INFO    ] src.pipeline.orchestrator: ✓ Stage export_deliverables completed (0.01s)
+2026-03-08 18:26:08 [INFO    ] src.pipeline.orchestrator: → Stage: write_run_manifest
+2026-03-08 18:26:08 [INFO    ] src.pipeline.manifest_builder: Run manifest written to: data/processed/qa/run-20260308-182607-c7029e_manifest.json
+2026-03-08 18:26:08 [INFO    ] src.pipeline.orchestrator: ✓ Stage write_run_manifest completed (0.00s)
+2026-03-08 18:26:08 [INFO    ] src.pipeline.orchestrator: Pipeline run complete: run-20260308-182607-c7029e (0.06s, 18 stages, 0 errors)
+2026-03-08 18:26:08 [INFO    ] run_pipeline: Run run-20260308-182607-c7029e complete — rooms:7 spa:0 dining:4 guests:7 errors:0
+2026-03-08 18:26:23 [INFO    ] run_pipeline: Guest Hub pipeline starting
+2026-03-08 18:26:24 [INFO    ] src.pipeline.orchestrator: Pipeline run started: run-20260308-182623-e6e699
+2026-03-08 18:26:24 [INFO    ] src.pipeline.orchestrator: → Stage: load_raw_sources
+2026-03-08 18:26:24 [INFO    ] src.loaders.room_loader: Found 1 room file(s) in: data/raw/rooms
+2026-03-08 18:26:24 [WARNING ] src.loaders.spa_loader: No spa PDF files found in: data/raw/spa
+2026-03-08 18:26:24 [INFO    ] src.loaders.dining_loader: Found 1 dining file(s) in: data/raw/dining
+2026-03-08 18:26:24 [INFO    ] src.pipeline.stages: Source files queued — rooms:1 spa:0 dining:1
+2026-03-08 18:26:24 [INFO    ] src.pipeline.orchestrator: ✓ Stage load_raw_sources completed (0.01s)
+2026-03-08 18:26:24 [INFO    ] src.pipeline.orchestrator: → Stage: load_reference_tables
+2026-03-08 18:26:24 [INFO    ] src.loaders.reference_loader: Loaded 19 room type codes from room_types.tsv
+2026-03-08 18:26:24 [INFO    ] src.loaders.reference_loader: Loaded 16 special request codes from special_requests.tsv
+2026-03-08 18:26:24 [INFO    ] src.pipeline.orchestrator: ✓ Stage load_reference_tables completed (0.00s)
+2026-03-08 18:26:24 [INFO    ] src.pipeline.orchestrator: → Stage: parse_rooms_xml
+2026-03-08 18:26:24 [INFO    ] src.parsers.room_parser: Parsed 3/3 room records from sample_room.xml
+2026-03-08 18:26:24 [INFO    ] src.pipeline.stages: Parsed 3 raw room records
+2026-03-08 18:26:24 [INFO    ] src.pipeline.orchestrator: ✓ Stage parse_rooms_xml completed (0.00s)
+2026-03-08 18:26:24 [INFO    ] src.pipeline.orchestrator: → Stage: parse_spa_pdf
+2026-03-08 18:26:24 [INFO    ] src.pipeline.stages: Parsed 0 raw spa records
+2026-03-08 18:26:24 [INFO    ] src.pipeline.orchestrator: ✓ Stage parse_spa_pdf completed (0.00s)
+2026-03-08 18:26:24 [INFO    ] src.pipeline.orchestrator: → Stage: parse_dining_csv
+2026-03-08 18:26:24 [INFO    ] src.parsers.dining_parser: Parsing dining CSV: sample_dining.csv
+2026-03-08 18:26:24 [INFO    ] src.parsers.dining_parser: Dropping 3 revenue column(s) from sample_dining.csv: ['Experience Price', 'Experience Title', 'Total Revenue']
+2026-03-08 18:26:24 [INFO    ] src.parsers.dining_parser: Parsed 4 dining records from sample_dining.csv
+2026-03-08 18:26:24 [INFO    ] src.pipeline.stages: Parsed 4 raw dining records
+2026-03-08 18:26:24 [INFO    ] src.pipeline.orchestrator: ✓ Stage parse_dining_csv completed (0.00s)
+2026-03-08 18:26:24 [INFO    ] src.pipeline.orchestrator: → Stage: standardize_shared_fields
+2026-03-08 18:26:24 [WARNING ] src.transforms.rooms_expand_guests: Accompanying guest name issue in sample_room.xml (conf=RES-003, seq=3): partial_name:'Guest'
+2026-03-08 18:26:24 [INFO    ] src.pipeline.stages: Rooms canonical: 7 guest rows from 3 raw records
+2026-03-08 18:26:24 [INFO    ] src.pipeline.orchestrator: ✓ Stage standardize_shared_fields completed (0.00s)
+2026-03-08 18:26:24 [INFO    ] src.pipeline.orchestrator: → Stage: standardize_spa
+2026-03-08 18:26:24 [INFO    ] src.pipeline.stages: Spa canonical: 0 rows
+2026-03-08 18:26:24 [INFO    ] src.pipeline.orchestrator: ✓ Stage standardize_spa completed (0.00s)
+2026-03-08 18:26:24 [INFO    ] src.pipeline.orchestrator: → Stage: standardize_dining
+2026-03-08 18:26:24 [INFO    ] src.pipeline.stages: Dining canonical: 4 rows
+2026-03-08 18:26:24 [INFO    ] src.pipeline.orchestrator: ✓ Stage standardize_dining completed (0.00s)
+2026-03-08 18:26:24 [INFO    ] src.pipeline.orchestrator: → Stage: write_canonical_outputs
+2026-03-08 18:26:24 [INFO    ] src.outputs.export_csv: Wrote 7 rows to rooms_canonical_interim.csv
+2026-03-08 18:26:24 [INFO    ] src.outputs.export_csv: Wrote 4 rows to dining_canonical_interim.csv
+2026-03-08 18:26:24 [INFO    ] src.pipeline.orchestrator: Interim canonical outputs written: rooms:7 spa:0 dining:4
+2026-03-08 18:26:24 [INFO    ] src.pipeline.orchestrator: ✓ Stage write_canonical_outputs completed (0.00s)
+2026-03-08 18:26:24 [INFO    ] src.pipeline.orchestrator: → Stage: run_qa_validations
+2026-03-08 18:26:24 [INFO    ] src.qa.name_issues: Found 1 room name issues
+2026-03-08 18:26:24 [INFO    ] src.qa.name_issues: Found 0 spa name issues
+2026-03-08 18:26:24 [INFO    ] src.qa.name_issues: Found 0 dining name issues
+2026-03-08 18:26:24 [INFO    ] src.qa.phone_issues: Found 4 room phone issues
+2026-03-08 18:26:24 [INFO    ] src.qa.phone_issues: Found 1 dining phone issues
+2026-03-08 18:26:24 [INFO    ] src.qa.duplicate_checks: Found 0 duplicate reservation-guest rows
+2026-03-08 18:26:24 [INFO    ] src.qa.validation: Validation complete: 1 name, 5 phone, 0 lookup, 0 duplicate issues
+2026-03-08 18:26:24 [INFO    ] src.pipeline.stages: QA validation complete: 6 total issues
+2026-03-08 18:26:24 [INFO    ] src.pipeline.orchestrator: ✓ Stage run_qa_validations completed (0.00s)
+2026-03-08 18:26:24 [INFO    ] src.pipeline.orchestrator: → Stage: build_guest_phone_dimensions
+2026-03-08 18:26:24 [INFO    ] src.matching.guest_resolver: Resolved 7 unique guest identities from rooms
+2026-03-08 18:26:24 [INFO    ] src.pipeline.stages: Built 7 guest identities, 3 phone records
+2026-03-08 18:26:24 [INFO    ] src.pipeline.orchestrator: ✓ Stage build_guest_phone_dimensions completed (0.00s)
+2026-03-08 18:26:24 [INFO    ] src.pipeline.orchestrator: → Stage: run_exact_matching
+2026-03-08 18:26:24 [INFO    ] src.qa.unmatched: Unmatched spa appointments: 0
+2026-03-08 18:26:24 [INFO    ] src.qa.unmatched: Unmatched dining visits: 1
+2026-03-08 18:26:24 [INFO    ] src.pipeline.stages: Matching complete: 3 links (spa:0 dining:3), unmatched spa:0 dining:1
+2026-03-08 18:26:24 [INFO    ] src.pipeline.orchestrator: ✓ Stage run_exact_matching completed (0.00s)
+2026-03-08 18:26:24 [INFO    ] src.pipeline.orchestrator: → Stage: run_fuzzy_matching
+2026-03-08 18:26:24 [INFO    ] src.pipeline.orchestrator: ✓ Stage run_fuzzy_matching completed (0.00s)
+2026-03-08 18:26:24 [INFO    ] src.pipeline.orchestrator: → Stage: apply_support_signals
+2026-03-08 18:26:24 [INFO    ] src.pipeline.orchestrator: ✓ Stage apply_support_signals completed (0.00s)
+2026-03-08 18:26:24 [INFO    ] src.pipeline.orchestrator: → Stage: build_hub_tables
+2026-03-08 18:26:24 [INFO    ] src.pipeline.orchestrator: Hub tables finalised: 7 guests, 3 phones, 3 activity bridges
+2026-03-08 18:26:24 [INFO    ] src.pipeline.orchestrator: ✓ Stage build_hub_tables completed (0.00s)
+2026-03-08 18:26:24 [INFO    ] src.pipeline.orchestrator: → Stage: build_fact_room_stay
+2026-03-08 18:26:24 [INFO    ] src.pipeline.stages: Built 3 fact_room_stay rows and 7 bridge_guest_room_stay rows
+2026-03-08 18:26:24 [INFO    ] src.pipeline.orchestrator: ✓ Stage build_fact_room_stay completed (0.00s)
+2026-03-08 18:26:24 [INFO    ] src.pipeline.orchestrator: → Stage: export_deliverables
+2026-03-08 18:26:24 [INFO    ] src.outputs.export_csv: Wrote 7 rows to rooms_canonical.csv
+2026-03-08 18:26:24 [INFO    ] src.outputs.export_csv: Wrote 4 rows to dining_canonical.csv
+2026-03-08 18:26:24 [INFO    ] src.outputs.export_csv: Wrote 7 rows to dim_guest.csv
+2026-03-08 18:26:24 [INFO    ] src.outputs.export_csv: Wrote 3 rows to dim_phone.csv
+2026-03-08 18:26:24 [INFO    ] src.outputs.export_csv: Wrote 3 rows to fact_room_stay.csv
+2026-03-08 18:26:24 [INFO    ] src.outputs.export_csv: Wrote 3 rows to bridge_guest_activity.csv
+2026-03-08 18:26:24 [INFO    ] src.outputs.export_csv: Wrote 7 rows to bridge_guest_room_stay.csv
+2026-03-08 18:26:24 [INFO    ] src.outputs.export_csv: Wrote 1 rows to qa_name_issues.csv
+2026-03-08 18:26:24 [INFO    ] src.outputs.export_csv: Wrote 5 rows to qa_phone_issues.csv
+2026-03-08 18:26:24 [INFO    ] src.outputs.export_csv: Wrote 1 rows to qa_unmatched_dining.csv
+2026-03-08 18:26:24 [INFO    ] src.outputs.export_csv: CSV export complete to: data/processed/canonical / data/processed/hub / data/processed/qa
+2026-03-08 18:26:24 [INFO    ] src.pipeline.orchestrator: ✓ Stage export_deliverables completed (0.01s)
+2026-03-08 18:26:24 [INFO    ] src.pipeline.orchestrator: → Stage: write_run_manifest
+2026-03-08 18:26:24 [INFO    ] src.pipeline.manifest_builder: Run manifest written to: data/processed/qa/run-20260308-182623-e6e699_manifest.json
+2026-03-08 18:26:24 [INFO    ] src.pipeline.orchestrator: ✓ Stage write_run_manifest completed (0.00s)
+2026-03-08 18:26:24 [INFO    ] src.pipeline.orchestrator: Pipeline run complete: run-20260308-182623-e6e699 (0.06s, 18 stages, 0 errors)
+2026-03-08 18:26:24 [INFO    ] src.outputs.export_excel: Excel workbook written: data/processed/hub/guest_hub_delivery.xlsx
+2026-03-08 18:26:24 [INFO    ] src.outputs.export_json: JSON export written: data/processed/hub/guest_hub.json
+2026-03-08 18:26:24 [INFO    ] src.outputs.package_run: Packaged 18 file(s) for run run-20260308-182623-e6e699 → data/archive/runs/run-20260308-182623-e6e699
+2026-03-08 18:26:24 [INFO    ] run_pipeline: Run run-20260308-182623-e6e699 complete — rooms:7 spa:0 dining:4 guests:7 errors:0

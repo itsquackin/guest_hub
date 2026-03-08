@@ -1,0 +1,6 @@
+source_system,source_row_id,confirmation_number,phone_raw,phone_clean,issue_code,issue_detail,is_inherited,is_shared
+rooms,sample_room:000001,RES-001,5551234567,5551234567,inherited_phone,,True,True
+rooms,sample_room:000001,RES-001,5551234567,5551234567,inherited_phone,,True,True
+rooms,sample_room:000003,RES-003,5557654321,5557654321,inherited_phone,,True,True
+rooms,sample_room:000003,RES-003,5557654321,5557654321,inherited_phone,,True,True
+dining,sample_dining:000004,,,,blank_phone,,False,False

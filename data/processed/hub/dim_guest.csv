@@ -1,0 +1,8 @@
+guest_id,best_first_name,best_last_name,best_full_name,canonical_name_key,first_seen_date,last_seen_date,has_room_activity,has_spa_activity,has_dining_activity,room_activity_count,spa_activity_count,dining_activity_count,linked_phone_count,name_confidence,identity_status
+G-7C0C88729F45,John,Smith,John Smith,john|smith,2025-01-10,2025-01-11,True,False,True,1,0,1,0,high,Confirmed
+G-B38239F7E72B,Jane,Smith,Jane Smith,jane|smith,2025-01-10,2025-01-10,True,False,False,1,0,0,0,high,Confirmed
+G-2AB6AE28F0EE,Bob,Johnson,Bob Johnson,bob|johnson,2025-01-10,2025-01-10,True,False,False,1,0,0,0,high,Confirmed
+G-45CD0F7AE52B,Alice,Brown,Alice Brown,alice|brown,2025-01-11,2025-01-12,True,False,True,1,0,1,0,high,Confirmed
+G-6B5F16742123,Maria,Garcia,Maria Garcia,maria|garcia,2025-01-12,2025-01-13,True,False,True,1,0,1,0,high,Confirmed
+G-01F8A6CA9DC1,Carlos,Garcia,Carlos Garcia,carlos|garcia,2025-01-12,2025-01-12,True,False,False,1,0,0,0,high,Confirmed
+G-59D5E6E51DAF,,Guest,Guest,|guest,2025-01-12,2025-01-12,True,False,False,1,0,0,0,low,Confirmed

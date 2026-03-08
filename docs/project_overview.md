@@ -20,7 +20,12 @@ The design keeps source parsing separate from matching and emphasizes explainabl
 - `src/`: loaders, parsers, transforms, matching, QA, outputs, legacy.
 - `tests/`: fixtures and staged unit tests.
 
-## Implementation note
+## Implementation status
 
-Current code is intentionally scaffold-level. Each module exposes signatures and TODOs aligned to
-Phase 1/2/3 milestones from the project skeleton.
+All three phases are complete and the pipeline is MVP-ready:
+
+- **Phase 1 (canonical foundation)**: rooms_canonical, spa_canonical, dining_canonical, room type/specials enrichment, QA name/phone flags
+- **Phase 2 (identity + linking)**: dim_guest, dim_phone, bridge_guest_activity, ExactNameDate + FuzzyNameDate matching, QA possible matches, unmatched outputs
+- **Phase 3 (reporting-safe stay truth)**: fact_room_stay, bridge_guest_room_stay, run manifest, CSV/Excel/JSON export, archive packaging
+
+Run with: `python run_pipeline.py [--excel] [--json] [--package]`

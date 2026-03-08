@@ -1,0 +1,4 @@
+guest_id,source_system,source_activity_key,activity_date,activity_time,match_method,match_score,match_flag_fuzzy,matched_within_stay_window,matched_by_phone_support,outside_stay_window_flag,repeated_pattern_flag,qa_review_required,linked_phones
+G-7C0C88729F45,dining,dining:sample_dining:000001,2025-01-11,7:30 PM,ExactNameDate,1.0,False,True,False,False,False,False,
+G-45CD0F7AE52B,dining,dining:sample_dining:000002,2025-01-12,8:00 PM,ExactNameDate,1.0,False,True,False,False,False,False,
+G-6B5F16742123,dining,dining:sample_dining:000003,2025-01-13,6:30 PM,ExactNameDate,1.0,False,True,False,False,False,False,

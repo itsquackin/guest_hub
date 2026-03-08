@@ -7,6 +7,7 @@ from dataclasses import dataclass, field
 from typing import Callable
 
 from src.pipeline.run_context import RunContext
+from src.models.enums import IdentityStatus
 
 logger = logging.getLogger(__name__)
 
@@ -77,6 +78,44 @@ def build_default_pipeline(ctx: RunContext) -> PipelineOrchestrator:
     from src.outputs.export_csv import export_all_csv
     from src.pipeline.manifest_builder import build_run_summary, write_run_manifest
 
+    def _write_canonical_outputs(ctx: RunContext) -> None:
+        """Stage 9: write interim canonical CSVs for debugging and auditability."""
+        from src.outputs.export_csv import write_csv
+        from src.utils.file_utils import ensure_dir
+        interim = ensure_dir(ctx.interim_dir)
+        write_csv(ctx.rooms_canonical,  interim / "rooms_canonical_interim.csv")
+        write_csv(ctx.spa_canonical,    interim / "spa_canonical_interim.csv")
+        write_csv(ctx.dining_canonical, interim / "dining_canonical_interim.csv")
+        logger.info(
+            "Interim canonical outputs written: rooms:%d spa:%d dining:%d",
+            len(ctx.rooms_canonical), len(ctx.spa_canonical), len(ctx.dining_canonical),
+        )
+
+    def _build_hub_tables(ctx: RunContext) -> None:
+        """Stage 15: finalize identity_status on dim_guest after matching is complete."""
+        confirmed = IdentityStatus.CONFIRMED
+        probable = IdentityStatus.PROBABLE
+        unresolved = IdentityStatus.UNRESOLVED
+        for guest in ctx.dim_guests.values():
+            # Upgrade to Confirmed when guest has activity in ≥2 source systems
+            source_count = sum([
+                guest.has_room_activity,
+                guest.has_spa_activity,
+                guest.has_dining_activity,
+            ])
+            if guest.has_room_activity:
+                # Room is the authoritative source — always Confirmed
+                guest.identity_status = confirmed
+            elif source_count >= 2:
+                # Multi-source spa/dining link without room stay
+                guest.identity_status = probable
+            else:
+                guest.identity_status = unresolved
+        logger.info(
+            "Hub tables finalised: %d guests, %d phones, %d activity bridges",
+            len(ctx.dim_guests), len(ctx.dim_phones), len(ctx.bridge_guest_activity),
+        )
+
     def _export(ctx: RunContext) -> None:
         export_all_csv(ctx)
 
@@ -94,13 +133,14 @@ def build_default_pipeline(ctx: RunContext) -> PipelineOrchestrator:
         ("standardize_shared_fields",   stage_standardize_and_expand_rooms),  # covers 6+7+8
         ("standardize_spa",             stage_standardize_spa),
         ("standardize_dining",          stage_standardize_dining),
-        ("write_canonical_outputs",     lambda c: None),  # handled by export step
+        ("write_canonical_outputs",     _write_canonical_outputs),  # writes interim CSVs
         ("run_qa_validations",          stage_run_qa_validations),
         ("build_guest_phone_dimensions",stage_build_guest_phone_dimensions),
-        ("run_exact_matching",          stage_run_matching),  # covers 12+13+14+15
-        ("run_fuzzy_matching",          lambda c: None),      # included in run_matching
+        ("run_exact_matching",          stage_run_matching),  # covers exact+fuzzy+signals
+        ("run_fuzzy_matching",          stage_run_matching.__class__.__init__  # no-op: included above
+            if False else lambda c: None),
         ("apply_support_signals",       lambda c: None),      # included in run_matching
-        ("build_hub_tables",            lambda c: None),      # included above
+        ("build_hub_tables",            _build_hub_tables),   # finalise identity_status
         ("build_fact_room_stay",        stage_build_fact_room_stay),
         ("export_deliverables",         _export),
         ("write_run_manifest",          _manifest),

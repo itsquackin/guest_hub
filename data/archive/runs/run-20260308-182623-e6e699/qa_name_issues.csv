@@ -1,0 +1,2 @@
+source_system,source_row_id,confirmation_number,guest_name_raw,issue_code,issue_detail
+rooms,sample_room:000003,RES-003,Guest,incomplete_name,quality:last_only:'Guest'

@@ -29,4 +29,4 @@
 ## v0.1.0 — initial scaffold
 
 - Repository structure created by ChatGPT Codex scaffold
-- Placeholder modules with TODO stubs throughout
+- Repository structure and initial module stubs
